@@ -1,0 +1,2325 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html>
+
+<head>
+    <meta http-equiv="X-UA-Compatible" content="IE=11; IE=10; IE=9; IE=8; IE=EDGE" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <script language="javascript" type="text/javascript" src="/jscript/date.js"></script>
+    <script Language="JavaScript" type="text/javascript" src="/jscript/disableEnter.js"></script>
+
+    <script language="javascript" type="text/javascript">
+// use ths function instead of typing out the long and tedious "document.getElementById"
+function getElement(val)
+{
+    if (document.getElementById(val))
+    {
+	    return document.getElementById(val);
+	}
+}
+
+function setDate(strDate, id, onchange)
+{
+	getElement(id).value = strDate;
+	eval(onchange);
+	$("#" + id).trigger("change");
+	
+} //setDate
+
+// given an actual date object, set the date field using a more useful utc format
+function setUtcDate(date, id) {
+
+    $("#" + id + "-utc").val(date);
+
+}
+</script>
+
+
+<script language="javascript" type="text/javascript">
+
+
+
+function checkDate(dateFrom, dateTo)
+{
+	if (dateFrom.length < 1 || dateTo.length < 1) 
+	{
+		return true;
+	}
+	else
+	{
+		dateFrom = dateFrom.split('/');
+		dateTo =  dateTo.split('/');
+		
+						
+			dateFrom = new Date(dateFrom[2],dateFrom[1]-1,dateFrom[0]);
+			dateTo = new Date(dateTo[2],dateTo[1]-1,dateTo[0]);
+		
+		
+		if ((dateTo - dateFrom) < 0) 
+		{
+			alert(alertMessage);
+			return false;
+		} else
+		{	
+			return true;
+		}
+	}
+	
+}
+
+
+
+
+
+function convertJSDate( sDate ){
+    
+    sDate = new String(sDate);
+    sDate = sDate.split('/');
+    
+    
+    				
+		sDate = new Date(sDate[2],sDate[1]-1,sDate[0]);
+	
+    return sDate;
+}
+
+
+
+function convertJSDateTime( sDate ){
+        
+    //first, we split the DateTime concactenate
+    sDateTime = new String(sDate);
+    sDateTime = sDateTime.split(" ");
+    //next, we split the date like we do in convertJSDate
+    sDate = sDateTime[0].split("/");
+    //then, we split the time
+    sTime = sDateTime[1].split(":");
+
+    
+    sDate = new Date(sDate[2],sDate[1]-1,sDate[0],sTime[0],sTime[1],"00");
+  
+    //convert from AM/PM to 24 hour format
+
+        if (sTime[2] === "PM" && sTime[0] !== "12")
+        {
+            sDate.setHours(sDate.getHours()+12);
+        } else if (sTime[2] === "AM" && sTime[0] === "12") {
+            sDate.setHours(0);
+        }
+    return sDate;
+}
+
+
+
+
+
+
+// ------------------------------------------------------------------
+// formatDate (date_object, format)
+// Returns a date in the output format specified.
+// The format string uses the same abbreviations as in getDateFromFormat()
+// ------------------------------------------------------------------
+function formatDate(date) 
+{
+
+ 				
+	format = "dd/MM/yyyy"
+
+
+	format=format+"";
+	var result="";
+	var i_format=0;
+	var c="";
+	var token="";
+	var y=date.getYear()+"";
+	var M=date.getMonth()+1;
+	var d=date.getDate();
+	var E=date.getDay();
+	var H=date.getHours();
+	var m=date.getMinutes();
+	var s=date.getSeconds();
+	var yyyy,yy,MMM,MM,dd,hh,h,mm,ss,ampm,HH,H,KK,K,kk,k;
+	// Convert real date parts into formatted versions
+	var value=new Object();
+	if (y.length < 4) {y=""+(y-0+1900);}
+	value["y"]=""+y;
+	value["yyyy"]=y;
+	value["yy"]=y.substring(2,4);
+	value["M"]=M;
+	value["MM"]=LZ(M);
+	value["MMM"]=MONTH_NAMES[M-1];
+	value["NNN"]=MONTH_NAMES[M+11];
+	value["d"]=d;
+	value["dd"]=LZ(d);
+	value["E"]=DAY_NAMES[E+7];
+	value["EE"]=DAY_NAMES[E];
+	value["H"]=H;
+	value["HH"]=LZ(H);
+	if (H==0){value["h"]=12;}
+	else if (H>12){value["h"]=H-12;}
+	else {value["h"]=H;}
+	value["hh"]=LZ(value["h"]);
+	if (H>11){value["K"]=H-12;} else {value["K"]=H;}
+	value["k"]=H+1;
+	value["KK"]=LZ(value["K"]);
+	value["kk"]=LZ(value["k"]);
+	if (H > 11) { value["a"]="PM"; }
+	else { value["a"]="AM"; }
+	value["m"]=m;
+	value["mm"]=LZ(m);
+	value["s"]=s;
+	value["ss"]=LZ(s);
+	while (i_format < format.length) {
+		c=format.charAt(i_format);
+		token="";
+		while ((format.charAt(i_format)==c) && (i_format < format.length)) {
+			token += format.charAt(i_format++);
+			}
+		if (value[token] != null) { result=result + value[token]; }
+		else { result=result + token; }
+		}
+	return result;
+}
+
+function formatDateTime(date, is24HourTime = false)
+{
+    var dateString = formatDate(date);
+
+    var hours = date.getHours();
+    var mins = date.getMinutes();
+    var amPm = "AM";
+
+	if (is24HourTime)
+	{
+		return dateString + " " + pad(hours, 2) + ":" + pad(mins, 2);
+	}
+
+    if (hours > 12)
+    {
+        hours -= 12;
+        amPm = "PM";
+    }
+
+    return dateString + " " + pad(hours, 2) + ":" + pad(mins, 2) + amPm;
+	}
+
+function pad(num, size) 
+{
+    var s = num + "";
+    while (s.length < size) s = "0" + s;
+    return s;
+}
+
+
+
+
+
+// ===================================================================
+// Author: Matt Kruse <matt@mattkruse.com>
+// WWW: http://www.mattkruse.com/
+//
+// NOTICE: You may use this code for any purpose, commercial or
+// private, without any further permission from the author. You may
+// remove this notice from your final code if you wish, however it is
+// appreciated by the author if at least my web site address is kept.
+//
+// You may *NOT* re-distribute this code in any way except through its
+// use. That means, you can include it in your product, or your web
+// site, or any other form where the code is actually being used. You
+// may not put the plain javascript up on your site for download or
+// include it in your javascript libraries for download. 
+// If you wish to share this code with others, please just point them
+// to the URL instead.
+// Please DO NOT link directly to my .js files from your site. Copy
+// the files to your server and use them there. Thank you.
+// ===================================================================
+
+// HISTORY
+// ------------------------------------------------------------------
+// May 17, 2003: Fixed bug in parseDate() for dates <1970
+// March 11, 2003: Added parseDate() function
+// March 11, 2003: Added "NNN" formatting option. Doesn't match up
+//                 perfectly with SimpleDateFormat formats, but 
+//                 backwards-compatability was required.
+
+// ------------------------------------------------------------------
+// These functions use the same 'format' strings as the 
+// java.text.SimpleDateFormat class, with minor exceptions.
+// The format string consists of the following abbreviations:
+// 
+// Field        | Full Form          | Short Form
+// -------------+--------------------+-----------------------
+// Year         | yyyy (4 digits)    | yy (2 digits), y (2 or 4 digits)
+// Month        | MMM (name or abbr.)| MM (2 digits), M (1 or 2 digits)
+//              | NNN (abbr.)        |
+// Day of Month | dd (2 digits)      | d (1 or 2 digits)
+// Day of Week  | EE (name)          | E (abbr)
+// Hour (1-12)  | hh (2 digits)      | h (1 or 2 digits)
+// Hour (0-23)  | HH (2 digits)      | H (1 or 2 digits)
+// Hour (0-11)  | KK (2 digits)      | K (1 or 2 digits)
+// Hour (1-24)  | kk (2 digits)      | k (1 or 2 digits)
+// Minute       | mm (2 digits)      | m (1 or 2 digits)
+// Second       | ss (2 digits)      | s (1 or 2 digits)
+// AM/PM        | a                  |
+//
+// NOTE THE DIFFERENCE BETWEEN MM and mm! Month=MM, not mm!
+// Examples:
+//  "MMM d, y" matches: January 01, 2000
+//                      Dec 1, 1900
+//                      Nov 20, 00
+//  "M/d/yy"   matches: 01/20/00
+//                      9/2/00
+//  "MMM dd, yyyy hh:mm:ssa" matches: "January 01, 2000 12:30:45AM"
+// ------------------------------------------------------------------
+
+var MONTH_NAMES=new Array('January','February','March','April','May','June','July','August','September','October','November','December','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec');
+var DAY_NAMES=new Array('Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sun','Mon','Tue','Wed','Thu','Fri','Sat');
+
+
+
+
+
+
+
+</script>
+    <script language="javascript" type="text/javascript" src="/jscript/xmlHttp.js?v=Version 1744260065335"></script>
+
+    <!-- this is legacy, and should be removed!! Please upgrade to the newest version. -->
+            <script language="javascript" type="text/javascript" src="/_share/js/jquery.js?v=Version 1744260065335"></script>
+            <script language="javascript" type="text/javascript" src="/_share/js/jquery-ui.js?v=Version 1744260065335"></script>
+    
+
+    <script language="javascript" type="text/javascript" src="/_share/js/func.common.js?v=Version 1744260065335"></script>
+    <!-- do not place the Application(APP_VERSION_NUMBER) in the querystring for the json file.  it will cause errors -->
+    <script language="javascript" type="text/javascript" src="/_share/js/func.JsonRPC.ashx?proxy"></script>
+    <script language="javascript" type="text/javascript" src="/_share/js/setup.JsonRPC.js?v=Version 1744260065335"></script>
+    <script language="javascript" type="text/javascript" src="/_share/js/func.json.js?v=Version 1744260065335"></script>
+    <script language="javascript" type="text/javascript" src="/_share/js/Src/Lib/Module.js?v=Version 1744260065335"></script>
+    <script language="javascript" type="text/javascript" src="/_share/js/Src/Pages/Storage/ModalLauncher.js?v=Version 1744260065335" ></script>
+    <script language="javascript" type="text/javascript" src="/_share/js/Src/Pages/SwitchPhysicalLocation.js?v=Version 1744260065335"></script>
+    <script language="javascript" type="text/javascript" src="/jscript/graphqlclient.js?v=Version 1744260065335"></script>
+    <script language="javascript" type="text/javascript" src="/scripts/Js/AspHeader.js?v=Version 1744260065335"></script>
+
+    <!-- this is legacy, and should be removed!! Please upgrade to the newest version. -->
+            <link type="text/css" href="/_share/css/jquery-ui.css" rel="stylesheet" />
+    
+
+    <!-- pines Notify jscript files -->
+    <link href="/_share/css/jquery.pnotify.default.css" rel="stylesheet" type="text/css" />
+    <script src="/_share/js/jquery.pnotify.min.js" type="text/javascript"></script>
+
+    <!-- multi select plug in files -->
+    <link href="/includes/jquery.multiselect.css" rel="stylesheet" type="text/css" />
+    <script src="/jscript/jquery.multiselect.min.js" type="text/javascript"></script>
+
+    <script language="javascript" type="text/javascript" src="/_share/js/Src/Lib/Module.js?v=Version 1744260065335"></script>
+
+<!-- include files to check the form is filled out -->
+
+
+    <script language="JavaScript" type="text/javascript">
+
+        var _rollbarConfig = {
+            accessToken: "d72fbc1f756640089c499e717efd93c2",
+            captureUncaught: true,
+            payload: {
+                environment: "DEVELOPMENT",
+                code_version: "Version 1744260065335"
+            },
+            ignoredMessages: [
+                // Justification: Chrome bug https://bugs.chromium.org/p/chromium/issues/detail?id=590375
+                "undefined is not an object (evaluating '__gCrWeb.autofill.extractForms')",
+                "ResizeObserver loop limit exceeded",
+            ],
+        };
+        // Rollbar Snippet
+        !function(r){function e(t){if(o[t])return o[t].exports;var n=o[t]={exports:{},id:t,loaded:!1};return r[t].call(n.exports,n,n.exports,e),n.loaded=!0,n.exports}var o={};return e.m=r,e.c=o,e.p="",e(0)}([function(r,e,o){"use strict";var t=o(1).Rollbar,n=o(2);_rollbarConfig.rollbarJsUrl=_rollbarConfig.rollbarJsUrl||"https://d37gvrvc0wt4s1.cloudfront.net/js/v1.9/rollbar.min.js";var a=t.init(window,_rollbarConfig),i=n(a,_rollbarConfig);a.loadFull(window,document,!_rollbarConfig.async,_rollbarConfig,i)},function(r,e){"use strict";function o(r){return function(){try{return r.apply(this,arguments)}catch(e){try{console.error("[Rollbar]: Internal error",e)}catch(o){}}}}function t(r,e,o){window._rollbarWrappedError&&(o[4]||(o[4]=window._rollbarWrappedError),o[5]||(o[5]=window._rollbarWrappedError._rollbarContext),window._rollbarWrappedError=null),r.uncaughtError.apply(r,o),e&&e.apply(window,o)}function n(r){var e=function(){var e=Array.prototype.slice.call(arguments,0);t(r,r._rollbarOldOnError,e)};return e.belongsToShim=!0,e}function a(r){this.shimId=++c,this.notifier=null,this.parentShim=r,this._rollbarOldOnError=null}function i(r){var e=a;return o(function(){if(this.notifier)return this.notifier[r].apply(this.notifier,arguments);var o=this,t="scope"===r;t&&(o=new e(this));var n=Array.prototype.slice.call(arguments,0),a={shim:o,method:r,args:n,ts:new Date};return window._rollbarShimQueue.push(a),t?o:void 0})}function l(r,e){if(e.hasOwnProperty&&e.hasOwnProperty("addEventListener")){var o=e.addEventListener;e.addEventListener=function(e,t,n){o.call(this,e,r.wrap(t),n)};var t=e.removeEventListener;e.removeEventListener=function(r,e,o){t.call(this,r,e&&e._wrapped?e._wrapped:e,o)}}}var c=0;a.init=function(r,e){var t=e.globalAlias||"Rollbar";if("object"==typeof r[t])return r[t];r._rollbarShimQueue=[],r._rollbarWrappedError=null,e=e||{};var i=new a;return o(function(){if(i.configure(e),e.captureUncaught){i._rollbarOldOnError=r.onerror,r.onerror=n(i);var o,a,c="EventTarget,Window,Node,ApplicationCache,AudioTrackList,ChannelMergerNode,CryptoOperation,EventSource,FileReader,HTMLUnknownElement,IDBDatabase,IDBRequest,IDBTransaction,KeyOperation,MediaController,MessagePort,ModalWindow,Notification,SVGElementInstance,Screen,TextTrack,TextTrackCue,TextTrackList,WebSocket,WebSocketWorker,Worker,XMLHttpRequest,XMLHttpRequestEventTarget,XMLHttpRequestUpload".split(",");for(o=0;o<c.length;++o)a=c[o],r[a]&&r[a].prototype&&l(i,r[a].prototype)}return e.captureUnhandledRejections&&(i._unhandledRejectionHandler=function(r){var e=r.reason,o=r.promise,t=r.detail;!e&&t&&(e=t.reason,o=t.promise),i.unhandledRejection(e,o)},r.addEventListener("unhandledrejection",i._unhandledRejectionHandler)),r[t]=i,i})()},a.prototype.loadFull=function(r,e,t,n,a){var i=function(){var e;if(void 0===r._rollbarPayloadQueue){var o,t,n,i;for(e=new Error("rollbar.js did not load");o=r._rollbarShimQueue.shift();)for(n=o.args,i=0;i<n.length;++i)if(t=n[i],"function"==typeof t){t(e);break}}"function"==typeof a&&a(e)},l=!1,c=e.createElement("script"),p=e.getElementsByTagName("script")[0],d=p.parentNode;c.crossOrigin="",c.src=n.rollbarJsUrl,c.async=!t,c.onload=c.onreadystatechange=o(function(){if(!(l||this.readyState&&"loaded"!==this.readyState&&"complete"!==this.readyState)){c.onload=c.onreadystatechange=null;try{d.removeChild(c)}catch(r){}l=!0,i()}}),d.insertBefore(c,p)},a.prototype.wrap=function(r,e){try{var o;if(o="function"==typeof e?e:function(){return e||{}},"function"!=typeof r)return r;if(r._isWrap)return r;if(!r._wrapped){r._wrapped=function(){try{return r.apply(this,arguments)}catch(e){throw"string"==typeof e&&(e=new String(e)),e._rollbarContext=o()||{},e._rollbarContext._wrappedSource=r.toString(),window._rollbarWrappedError=e,e}},r._wrapped._isWrap=!0;for(var t in r)r.hasOwnProperty(t)&&(r._wrapped[t]=r[t])}return r._wrapped}catch(n){return r}};for(var p="log,debug,info,warn,warning,error,critical,global,configure,scope,uncaughtError,unhandledRejection".split(","),d=0;d<p.length;++d)a.prototype[p[d]]=i(p[d]);r.exports={Rollbar:a,_rollbarWindowOnError:t}},function(r,e){"use strict";r.exports=function(r,e){return function(o){if(!o&&!window._rollbarInitialized){var t=window.RollbarNotifier,n=e||{},a=n.globalAlias||"Rollbar",i=window.Rollbar.init(n,r);i._processShimQueue(window._rollbarShimQueue||[]),window[a]=i,window._rollbarInitialized=!0,t.processPayloads()}}}}]);
+        // End Rollbar Snippet
+
+    </script>
+
+    <script language="Javascript" type="text/javascript">
+
+    //A call to this function should be included in the onSubmit of the form.
+    function CanUpdatePage()
+    {
+    
+        return true;
+    
+    }
+
+    function loadJobs()
+    {
+        NewWindow('/person/currentJobs.asp','jobs',700,500,'yes','center')
+    }
+
+    String.prototype.trim = function() {
+        return this.replace(/^\s+|\s+$/g,"");
+    }
+    String.prototype.ltrim = function() {
+        return this.replace(/^\s+/,"");
+    }
+    String.prototype.rtrim = function() {
+        return this.replace(/\s+$/,"");
+    }
+
+    </script>
+
+    <title>Shelter Mate Development</title>
+
+    <!-- site formating via style sheets -->
+    <link rel="stylesheet" href="rspca_style.css?v=Version 1744260065335">
+    
+    <!-- Google Tag Manager for https://www.shelterbuddy.com/ -->
+    <script>
+        (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+        new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+        'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+        })(window,document,'script','dataLayer','GTM-N4MVDBZ');
+    </script>
+    <!-- End Google Tag Manager -->
+
+
+        <meta NAME="ROBOTS" CONTENT="noindex,nofollow">
+        <script type="text/javascript" src="/jscript/ga.js"></script>
+
+        <script type="text/javascript">
+            try {
+                var pageTracker = _gat._getTracker("UA-9798714-1");
+                pageTracker._setDomainName("none");
+                pageTracker._setAllowLinker(true);
+                pageTracker._trackPageview();
+            } catch (err) { }</script>
+
+    <script type="text/javascript">
+        window.ShelterManagement = {
+            API_GATEWAY_SERVICE_URL: "https://shelterbuddy-service-sbui-1962-dev.shelterbuddy.io/",
+            IS_SSO_ENABLED: "False".toLowerCase() === "true"
+        };
+    </script>
+    
+    <script src="/react/classic/static/js/main.9b6a1f17.chunk.js"></script>
+    <script src="/react/classic/static/js/runtime-main.d5d84109.js"></script>
+
+    </head>
+
+
+    <body  marginwidth="0" marginheight="0" topmargin="0" leftmargin="0"  >
+
+
+        <!--logo header-->
+        
+    <!-- Google Tag Manager (noscript) -->
+    <noscript>
+        <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-N4MVDBZ" height="0" width="0" style="display:none;visibility:hidden"></iframe>
+    </noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
+            <table width="100%" border="0" cellspacing="0" cellpadding="0" bgcolor="white">
+                <tr>
+                    <td style="vertical-align:top;" width="265" align="left" height="100%">
+                        <a href="/">
+                          <img id="site-logo" border="0" src="/_image/SiteLogo.ashx" height="60" alt="ShelterBuddy" />
+                        </a>
+                    </td>
+
+                    <td style="text-align:center;color:black; font-size:20px;">
+                        
+                            <span style="color:#ff3333; font-weight:bold; font-size:20pt;">DEVELOPMENT SITE</span>
+                        
+                    </td>
+                    
+                    <td id="switch-to-new-ui-cell">
+                        <a id="SwitchToNewUi" href="#" data-route="">Try the new UI</a>
+                    </td>
+                    
+                    <td id="header-user-setting-cell">
+                        <ul>
+                            
+                            <li><a href="/administration/user/UserSetting.aspx">User Settings</a></li>
+                            <li>
+        <select name="region-switch" id="region-switch" class="region-switch" onchange="" >
+        
+                <option value="" selected>Switch Location</option>
+                <option value="90">Apostrophe's Region</option><option value="59">Bingo the Adoption Centre</option><option value="53">Boston</option><option value="54">Dallas</option><option value="10696">Hollister</option><option value="64">Ingleside Shelter</option><option value="51">Los Angeles</option><option value="63">Mountain Region</option><option value="92">New Medication Region</option><option value="91">Parksville-Qualicum Beach & District Branch</option><option value="65">Pet Match Adoption Centre</option><option value="62">Petitude</option><option value="60">Ralph</option><option value="61">San Diego</option><option value="57">Satellite Pet Centre</option><option value="58">The Humane Pet Shop</option><option value="56">Weird and Wacky World of Pets</option><option value="55">YouBeaut Pets Offsite Adoptions</option>
+        </select>
+        </li>
+                        </ul>
+                        <span id="SuccessMessageContainer" class="SuccessBlock hide">
+                            Success! <span id="SuccessMessage"></span>
+                        </span>
+                        <span id="ErrorMessageContainer" class="ErrorBlock hide">
+                            Error! <span id="ErrorMessage"></span>
+                        </span>
+                    </td>
+                    <td align="right">
+                        <a href="/">
+                            
+                                <img border="0" src="/images/pro.gif" width="185" height="65" alt="Shelterbuddy Pro">
+                            
+                        </a>
+                    </td>
+                </tr>
+            </table>
+        
+        <!--RSPCA sidebar navigation and page content-->
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="vertical-align:top;" ID="Table4">
+
+            <tr>
+                <td bgcolor="#ff9933" width="120" style="vertical-align:top;">
+
+                  <table width="100%" border="0" cellspacing="0" cellpadding="4" style="vertical-align:top;" ID="Table5">
+                    
+
+                    <tr>
+                      <td bgcolor="#ff9933" align="right">
+                                <br>
+                            
+                                        <a class="amainnav" href="/main.asp">Search</a><br>
+                                        
+                                            <a class="amainnav" href="/personinfo/personDetails.aspx">New Record</a><br>
+                                        
+
+                                            <a class="amainnav" href="/person/dispatch/jobPage.asp">New Dispatch Job</a><br />
+                                            <a class="amainnav" href="/person/dispatch/legal/default.asp">Legal Proceedings</a><br />
+
+                                            <a class="amainnav" href="/search/inspectorSearch.asp">Dispatch Search</a><br>
+
+                                            <script language="javascript">
+                                                function summaryPopup()
+                                                {
+                                                    var width = screen.width;
+                                                    var height;
+                                                    if (screen.availheight)
+                                                    {
+                                                        height = screen.availheight;
+                                                    }
+                                                    else
+                                                    {
+                                                        height = screen.height;
+                                                    }
+                                                    width -= 10;
+                                                    height -= 30;
+                                                    mywindow = window.open ("/person/dispatch/dispatchPage.asp",
+                                                    "dispatchPage","width=" + width + ",height=" + height + ",status=1,titlebar=1,scrollbars=yes");
+                                                    mywindow.moveTo(0,0);
+                                                }
+                                            </script>
+                                            <a class="amainnav" href="" onclick="summaryPopup();return false;">Dispatch Summary</a><br>
+
+                                        
+
+                                        <a class="amainnav" href="/Boarding/Boarding.aspx">Boarding</a><br>
+
+                                        
+                                                <a class="amainnav" href="/virtualshelter/">Virtual Shelter</a><br>
+                                            
+
+                                        <a class="amainnav" href="/Reporting/Default.aspx">Reports</a><br>
+                                        <a class="amainnav" href="/receipts/default.asp">Receipts</a><br>
+                                        <a class="amainnav" href="/fundraising/default.asp">Fundraising</a><br>
+                                        <a class="amainnav" href="#" onclick="window.openStorageModal('Document Library','7036BF02-37BD-4D8E-88BE-D53AE7D06C19', 0, 'doc');">Doc. Library</a>
+                                        <br/>
+
+                                        <a class="amainnav" href="/UsefulLinks/List.aspx">Useful Links</a><br>
+
+                                        
+
+                                            <ul class="sub-menu">
+                                              <li><a class="amainnav" href="#">Scheduling</a>
+                                                <ul>
+                                                  <li><a href="/Scheduling/Dashboard.aspx">Dashboard</a></li>
+                                                  <li><a href="/Scheduling/Calendar.aspx">Calendar</a></li>
+                                                  <li><a href="/Scheduling/AppointmentSearch.aspx">Scheduled appointment search</a></li>
+                                                  <li><a href="/Scheduling/SearchAvailable.aspx">Search available time</a></li>
+                                                </ul>
+                                              </li>
+                                            </ul>
+                                            <br />
+                                        
+                                            <a class="amainnav" href="/volunteering/admin/">VolunteerBuddy</a><br>
+                                        
+                                            <a class="amainnav" href="/licensingadmin">Licensing</a><br>
+                                        
+                                            <a class="amainnav" href="/Modules/DataImport/Index.aspx">Data Import</a><br>
+                                        
+
+                                        <a class="amainnav" href="/admin/">Administration</a><br>
+
+                                        
+                                            <a class="amainnav" href="/system/default.asp">System Options</a><br>
+
+                                        
+
+
+                                        <a class="amainnav" href="/logoff.aspx">Logout</a><br>
+
+                                        
+                                        <br>
+                                        <a class="amainnav" href="/system/support.asp" title="Shelter Buddy Support.">Support</a><br /><br />
+                                        <a class="amainnav" href="/intranet/index.html" title="Intranet">Intranet</a><br>
+
+                                        
+                        </td>
+                      </tr>
+
+                      
+
+                      <tr>
+                            <td style=" background-color:#003399;
+                                        font-style:verdana,arial,trebuchet MS, geneva, sans-serif;
+                                        text-align:center;
+                                        font-weight:bold;
+                                        font-size:13px;
+                                        ">
+
+                                    Contact Number<br>
+                                    1800 196 002
+
+                            </td>
+                      </tr>
+                    </table>
+                    
+
+                   <img src="/images/hotlinepic.gif" alt="Cruelty Helpline" style="border:0px;">
+
+                </td>
+                <td width="3%">&nbsp;</td>
+                
+                <td width="90%" style="vertical-align:top;">
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0" ID="Table6">
+                        <tr>
+                            <td width="5%">
+                                <img border="0" style="vertical-align:top;" src="images/sml_paw.gif" width="50" height="40" alt="paw">
+                            </td>
+                            <td style="vertical-align:top;" align="left" id="headingColumn"><h1>Welcome</h1></td>
+                        </tr>
+                        
+                        <tr>
+                            <td colspan="2" style="vertical-align:top;"><img src="images/header_rule2.gif" width="450" alt="horizontal rule pic">
+                            </td>
+                        </tr>
+                        
+                    </table>
+
+                
+
+<link type="text/css" href="/_share/css/hidePostcodeSuffix.css" rel="stylesheet" />
+<link type="text/css" href="/_share/css/Pages/Main.css" rel="stylesheet" />
+<script language="javascript" type="text/javascript" src="/jscript/disableButton.js?v=Version 1744260065335"></script>
+<script language="javascript" type="text/javascript" src="/jscript/case.js?v=Version 1744260065335"></script>
+<script language="javascript" type="text/javascript" src="/jscript/validateNum.js?v=Version 1744260065335"></script>
+<script language="javascript" type="text/javascript" src="/jscript/newWindow.js?v=Version 1744260065335"></script>
+<script language="javascript" type="text/javascript" src="/jscript/shelterLocation.js?v=Version 1744260065335"></script>
+<script language="javascript" type="text/javascript" src="/jscript/validatePhone.js?v=Version 1744260065335"></script>
+<script language="javascript" type="text/javascript" src="/jscript/autoTab.js?v=Version 1744260065335"></script>
+<script type="text/javascript" language="javascript" src="/jscript/location.js?v=Version 1744260065335"></script>
+<script language="javascript" type="text/javascript" src="/_share/js/Src/Lib/AnimalSubStatus.js?v=Version 1744260065335"></script>
+<!-- do not place the application(APP_VERSION_NUMBER) in the querystring for the json file.  it will cause errors -->
+<script language="javascript" type="text/javascript" src="/_share/js/func.JsonRPC.ashx?proxy"></script>
+
+        <script type="text/javascript">
+            var SbCustomise = function() {
+                this.sbcustomise = {};
+                this.sbcustomise["clientid"] = 20;
+                this.sbcustomise["environment"] = "DEVELOPMENT";
+                this.sbcustomise["googlemapsclientid"] = "";
+                this.sbcustomise["googlemapsapikey"] = "AIzaSyC2nJT-434BlgeN_lyeb4vJiyYiDCycHdA";
+            };
+            SbCustomise.prototype.getValue = function(key) {
+                if (this.sbcustomise[key] !== undefined) {
+                    return this.sbcustomise[key];
+                }
+                return null;
+            };
+        </script>
+        <script language="javascript" type="text/javascript" src="/_share/js/src/lib/autocompleteaddress.js?v=Version 1744260065335"></script>
+        <script type="text/javascript" src="/_share/js/src/lib/mapaddress.js?v=Version 1744260065335"></script>
+        <script language="javascript" type="text/javascript" src="/_share/js/src/Pages/Common/StateAutocomplete.js?v=Version 1744260065335"></script>
+        
+<script language="javascript" type="text/javascript">
+
+
+
+        $(document).ready(function() {
+
+             // Dialog
+            $('#locationDlg').dialog({
+                autoOpen: false,
+                draggable: true,
+                width: 500,
+                height: 400,
+                bgiframe: true,
+                modal: true
+            });
+
+        });
+
+        /*
+         * This function takes the state id, then a possible 3 phone number fields to set the default area code for
+         * If fax is not required, send empty string (same applies for home and work)
+         */
+        function defaultAreaCode(stateID, homePhone, workPhone, fax) {
+
+            var j = new SBJsonRPC();
+
+            // get the area code for this state - func.JsonRPC.ashx.cs
+            var sAreaCode = j.GetAreaCodeByStateID(stateID);
+
+
+            if (homePhone.length > 0) setAreaCode(homePhone, sAreaCode);
+
+            if (workPhone.length > 0) setAreaCode(workPhone, sAreaCode);
+
+            if (fax.length > 0) setAreaCode(fax, sAreaCode);
+
+        }
+
+        function setAreaCode(prefix, sAreaCode) {
+
+            var j = new SBJsonRPC();
+
+            // get the length of the first part of the phone for this site
+            var iPhoneLengthDefault = "2";
+
+            // get the full phone number
+            var phone = $("#"+prefix + "1").val() + $("#"+prefix + "2").val() + $("#"+prefix + "3").val();
+
+            // if the 2nd and 3rd parts of the phone are empty
+            if ($("#"+prefix + "2").val().length == 0 && $("#"+prefix + "3").val().length == 0) {
+
+                // if theres only the area code, or nothing entered, update the area code
+                if (phone.length == iPhoneLengthDefault || phone.length == 0) {
+
+                    $("#"+prefix + "1").val(sAreaCode);
+                }
+                else {
+                    // no area code so empty it
+                    $("#"+prefix + "1").val("");
+                }
+
+            }
+        }
+
+        function getPostalCode(prefix) {
+            var postalCode = $("#" + prefix + "-places-postalcode").val();
+            return postalCode;
+        }
+		
+
+</script>
+
+<script language="javascript" type="text/javascript">
+    function checkSearchHistory() {
+        if ((getElement("searchShelterTagHistory").checked) && (getElement("searchAnimalNameHistory").checked)) {
+            alert("You can not search both Shelter Tag Number/Band History and Name History at the same time. Please only select one option.");
+            document.getElementById("searchShelterTagHistory").checked = false;
+            document.getElementById("searchAnimalNameHistory").checked = false;
+            return false;
+        }
+    }
+
+    function checkVIPHistory(){
+        
+            if((getElement("searchVIPHistory").checked)&&(getElement("searchAnimalNameHistory").checked))
+            {
+                alert("You can not search both SPCA Tag History and Name History at the same time. Please only select one option.");
+                document.getElementById("searchVIPHistory").checked = false;
+                document.getElementById("searchAnimalNameHistory").checked = false;
+                return false;
+            }
+        
+    }
+</script>
+
+<form action="#" method="get">
+    <fieldset style="width:600px">
+        <legend>Search Menu</legend>
+        <table border=0 cellspacing="15" cellpadding="3" ID="Table1">
+            <tr>
+                <td valign="top">
+                    
+                        <a href="/person/onlinediary/default.asp?search=yes"><span class="animalMenu">Online Diary</span></a><br>
+                    
+                        <a href="/Fundraising/Acquisition/AcquisitionList.aspx"><span class="animalMenu">Pre Registration / Data Acquisition</span></a><br>
+                    
+                    <a href="#vip"><span class="animalMenu">Registration Owner Search</span></a><br>
+                    
+                        <a href="#poundSearch"><span class="animalMenu">Council Search</span></a><br> 
+                    
+                        <a href="#ambo"><span class="animalMenu">Ambulance Search</span></a><br>
+                    
+                        <a href="/person/advSearch.asp?job=agencyLink"><span class="animalMenu">Council Animal Link Search</span></a>
+                    
+                </td>    
+            
+                    <td valign="top">
+                        
+                            <a href="#amboPickUp"><span class="animalMenu">Ambulance Pick up Location Search</span></a><br>
+                        
+                <a href="#receipt"><span class="animalMenu">Receipt Search</span></a>
+
+                </td>    
+                <td valign="top">    
+                
+                    <a href="#animalTransfer"><span class="animalMenu">Animal Transfer Search</span></a><br>
+                
+                
+                    <a href="#mircochip"><span class="animalMenu">Microchip Search</span></a><br>
+                                                                                    
+                    
+                        <a href="#obedience"><span class="animalMenu">Obedience Handler Search</span></a><br>
+                    
+                
+                </td>        
+          
+                <td valign="top">                                
+                    
+                        <a href="/search/sponsorshipSummary.asp"><span class="animalMenu">Sponsorship Overview</span></a>
+                    
+                </td>
+            </tr>
+
+            <tr>
+                <td valign="top">
+                    <a href="/AnimalInfo/BulkUpdateMenu.aspx"><span class="animalMenu">Bulk Updating Menu</span></a><br />
+                    <a href="/Animal/Task/List.aspx"><span class="animalMenu">Animal Tasks</span></a>
+                </td>
+                            
+                    <td valign="top"><a href="/AnimalInfo/Microchip/Deregistration/List.aspx"><span class="animalMenu">Microchip Deregistration Forms</span></a></td>
+                
+                <td valign="top"><a href="/Shelter/Kennel/CleaningRequest/List.aspx"><span class="animalMenu">Kennel Cleaning Requests</span></a></td>
+                
+                
+                    <td valign="top"><a href="/Animal/Treatment/Dashboard.aspx"><span class="animalMenu">Planned Treatments</span></a></td>
+                
+            </tr>
+        </table>
+    </fieldset>    
+</form>
+
+
+
+<div id="UserProfile"></div>
+<table width=650 border=0 cellspacing="15" cellpadding="3">
+    <tr>
+        <td valign="top">
+            <table width=100% border=0>
+                <tr>
+                    <td colspan="2"><a href="/person/advSearch.asp">Person Advanced Search</a></td>
+                </tr>
+                <tr>
+                    <Td colspan="2" align="center"><h2>Person Search</h2></td>
+                </tr>
+                <tr>
+                    <td>Go to Person ID:</td>
+                    <td>
+                        <form class="no-confirmation" action="/person/userid.asp?task=search&tpage=1" method=post id=form3 name=form3 onsubmit="this.userid.value = this.userid.value.trim(); return validateReturn(this.userid)">
+                            <input type="text" name="userid" id="userid" maxlength="10" size="10" onblur="">&nbsp;&nbsp;<input type=submit class="disable-processing no-confirmation" name=btnSubmit value="View" ID="Submit1">
+                        </form>
+                    </td>
+                </tr>
+
+                
+                <tr>
+                    <td>Go to Council:</td>
+                    <td>
+                        <form class="no-confirmation" action="/person/searchResults.asp?task=search&tpage=1" method=post id=goToPoundForm name=goToPoundForm>
+                            
+        <select name="pound" id="pound" >
+        
+        <option value=""></option>
+        
+                    <option value="41321">*Brisbane City Council</option>
+                    
+                    <option value="153361">Animal Emergency Clinic</option>
+                    
+                    <option value="157741">Big Council Shelter</option>
+                    
+                    <option value="147228">Bling</option>
+                    
+                    <option value="146100">Bonobo Shire Council</option>
+                    
+                    <option value="27027">Brown Regional Council</option>
+                    
+                    <option value="30529">Cairns City Council</option>
+                    
+                    <option value="26134">Carlton</option>
+                    
+                    <option value="147195">Cassowary Coast Regional Council</option>
+                    
+                    <option value="230765">City Of Hollister</option>
+                    
+                    <option value="63975">Control</option>
+                    
+                    <option value="25870">Cooloola Shire Council</option>
+                    
+                    <option value="25964">Henry</option>
+                    
+                    <option value="41322">Hooby Dooby Council</option>
+                    
+                    <option value="141507">Ipswich City Council</option>
+                    
+                    <option value="47771">KENT COUNTY ANIMAL SHELTER</option>
+                    
+                    <option value="25865">Kingaroy, Regional Council</option>
+                    
+                    <option value="25935">Lemmy</option>
+                    
+                    <option value="61940">New Agency Record</option>
+                    
+                    <option value="25924">Nicci'S Council</option>
+                    
+                    <option value="25866">Noosa Shire Council</option>
+                    
+                    <option value="62552">Okepoke Regional Council</option>
+                    
+                    <option value="25867">Pine Rivers Shire Council</option>
+                    
+                    <option value="26005">RSPCA</option>
+                    
+                    <option value="230767">San Benito County</option>
+                    
+                    <option value="156948">Tellington Shire Council</option>
+                    
+                    <option value="329131">Test</option>
+                    
+                    <option value="196805">Test Agency Sb-10258</option>
+                    
+                    <option value="349709">Test For Address</option>
+                    
+                    <option value="25868">Thuringowa City Council</option>
+                    
+                    <option value="30528">Toowoomba Regional Council</option>
+                    
+        </select>
+
+    
+                            &nbsp;&nbsp;<input type=submit class="disable-processing" name=btnSubmit value="View" ID="Submit2">
+                        </form>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Go to Shelter / Rescue:</td>
+                    <td>
+                        <form class="no-confirmation" action="/person/searchResults.asp?task=search&tpage=1" method=post id="goToShelterForm" name=goToShelterForm>
+                            
+			<select name="shelter" id="shelter" >
+				<option value=""></option>
+				<option value="210941">4 The Love Of Paws</option><option value="97650">A Rescue For Parentless Regions</option><option value="97506">A Single Region Rescue</option><option value="27383">Albion & Eaton Hill Vet</option><option value="147193">All Breed Rescue</option><option value="28462">All Creatures Rescue</option><option value="163298">All The Animals Rescue</option><option value="153361">Animal Emergency Clinic</option><option value="184513">Animal Rescue</option><option value="147197">Animal Specialist Centre</option><option value="210942">Bean's Bassetts N Beagles</option><option value="235809">Bully Love Bull Breed Rescue</option><option value="147366">Camerons Shelter</option><option value="28455">Cat Rescue</option><option value="210943">China Dog Rescue</option><option value="235808">Collie + Sheltie Rescue Assoc. Of Se Qld</option><option value="25973">Control</option><option value="">C-SNIP</option><option value="147353">Fluffypants Rescue</option><option value="146099">Hounds Of Bassetville</option><option value="147222">Many Paws Pet Rescue</option><option value="27174">Nicci & Bobs Neonate Rescue</option><option value="28506">Orsm Wildlife Rescue</option><option value="25940">Paddington Pets Vet</option><option value="256087">Pet Collective</option><option value="28503">Rescue Plantation</option><option value="26616">Rorshach & Pongos Spotted Dog Rescue</option><option value="26006">Samoyed Rescue</option><option value="25821">Shelter Rescue</option><option value="288316">Test Group</option><option value="147407">Test Rescue</option><option value="257846">Wendy's Rescue</option><option value="97553">Wholesome Vet Clinic And Rescue</option><option value="210940">Wigglin Home Boxer Rescue</option>
+			</select>
+		
+                            &nbsp;&nbsp;<input type=submit name=btnSubmit class="disable-processing" value="View" ID="Submit18">
+                        </form>
+                    </td>
+                </tr>
+
+            </table>
+        </td>
+    
+        <td valign="top">
+            <table width=100% border=0>
+                <tr>
+                    <td colspan="2"><a href="/animal/advSearchAnimal.asp">Animal Advanced Search</a></td>
+                </tr>
+                <tr>
+                    <Td colspan="2" align="center"><h2>Animal Search</h2></td>
+                </tr>
+                <tr>
+                    <td>Go to Animal ID:</td>
+                    <td>
+                        <form class="no-confirmation" action="/animal/animalid.asp" method=post name=animalIDForm ID="Form1" onsubmit="this.animalID.value = this.animalID.value.trim(); return validateReturn(this.animalID)">
+                            <input type="text" name="animalID" maxlength="10" size="10"  onblur="" ID="Text1">&nbsp;&nbsp;<input type=submit class="disable-processing" name=animalIDSubmit value="View" ID="Submit3">
+                        </form>
+                    </td>
+                </tr>
+            </table>
+        </td>
+      
+    </tr>
+    <tr>
+        <td colspan="2" style="border-bottom:1px solid #ff9933;">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top">
+            <form class="no-confirmation" action="/person/searchresults.asp?task=search&tpage=1&search=fast" method=post id=form2 name=form2>    
+            <table width=100% border=0 ID="Table5">        
+            <tr>
+                <Td colspan=2 align=center><input type=submit class="disable-processing" name=btnSubmit2 value="Search" ID="Submit4"></td>
+            </tr>
+            
+            <tr>
+                <td>Partial search:</td>
+                <td><input type=checkbox  ID="partialSearchPerson" NAME="partialSearchPerson"></td>
+            </tr>
+            
+            <tr>
+                <Td>Last Name:</td>
+                <td nowrap><input type=text name=LastName onchange="changeCase(this);" ID="LastName">
+                    <input type=checkbox ID="chkPeronNameHistory" NAME="chkPeronNameHistory" value="on"> Search Person Name History
+                </td>
+            </tr>
+            <tr>
+                <Td>First Name:</td>
+                <td><input type=text name=FirstName onchange="changeCase(this);" ID="Text3"></td>
+            </tr>                    
+            <tr>
+                <Td>DOB:</td>
+                <td>
+                
+		<input type=text  maxlength=10 size="10" name="DOB" id="DOB" value="" style="pointer-events: none;" onkeydown="return false;" >
+		&nbsp;&nbsp;
+		<A id="DOBCalendarLink" href="/scripts/calendar.asp?field=DOB&dateJScript=False&onchange=&doesAllowFutureDates=True" OnClick="NewWindow(this.href,'calendar',205,230,'no','center'); return false;">
+		<IMG align=top border=0 height=25 id="DOBCalendar" src="/images/calendar.gif" width=26></A>
+        <input type="hidden" value="" id="DOB-utc" name="DOB-utc" />
+		    
+                </td>                
+            </tr>
+                    
+            <tr>
+            <td colspan="2">
+                <fieldset>
+                    <legend>Address</legend>
+                    <table>
+                        <tr>
+                            <td>Address Line:</td>
+                            <td><input type="text" name="line1" id="line1" maxlength="500" size="30" /></td>
+                        </tr>
+                        
+		<script language="">
+		    var psuburbPostcodeField = "ppostcode";
+		    var psuburbStateField = "pstate";
+		    var psuburbCountryField = "country";
+		    var psuburbJurisdictionField = "";
+		    var psuburbJurisdictionHiddenField = "jurisdiction";
+		    var psuburbClassType = "";
+		    var psuburbStateColumn = "";
+		    var psuburbDivPopup = "locationDlg";
+		    var psuburbDivId = "locationBd";
+		    var psuburbUseJurisdictionId = true;
+
+		    var psuburbSavedSuburb = "";
+		    var psuburbSavedSuburbId = "";
+		    var psuburbSavedPostcode = "";
+		    var psuburbSavedPostcodeSuffix = "";
+		    var psuburbSavedState = "";
+		    var ppostcodeCheck = true;
+
+            var psuburbChangeCountryScript = "";
+            var psuburbAllFieldOnChange = "";
+            var psuburbSavedCountry = "";
+            var psuburbbAdminInput = false;
+		</Script>
+		<tr>
+			<td class="" id="psuburbLabel">Suburb:</td>
+			<td class="" colspan="">
+                <input type="hidden" id="psuburb-places-postalcode" data-sb-places="postal_code" data-sb-places-priority="2" value="" />
+                <input type="text" id="psuburb" value="" name="psuburb" size="20" maxlength="50" onchange="getElement('psuburbId').value = '';loadSuburb('psuburb', this.value, getPostalCode('psuburb'), '');"  data-sb-address="suburb" data-sb-places="locality" data-sb-places-aux="sublocality" data-sb-places-wait="true" data-sb-places-priority="3" />&nbsp;
+			<input type="button" value="Find Suburb" onClick="if(getElement('psuburb').value.length==0){ alert('Please enter a Suburb in the Suburb field');}else{loadSuburb('psuburb', getElement('psuburb').value, getPostalCode('psuburb'), '');}" name="psuburbButton2" ID="psuburbButton2" data-sb-places="find-suburb">
+			<input type="hidden" name="psuburbId" id="psuburbId" value="">
+			</td>
+		</tr>
+		<tr>
+			<td id="ppostcodeLabel" class="">Post Code:</td>
+			<td colspan="" class="">
+                <div style="margin:0px;padding:0px;" id="psuburbpostcodeDiv"></div>
+			</td>
+		</tr>
+		<tr>
+			<td id="pstateLabel" class="">State:</td>
+			<td colspan="" class="">
+                <input type="text" data-autocomplete="state" name="pstate" id="pstate" value="" data-onchange="" />
+                
+                <input type="hidden" ID="fieldIds" data-fields='{"Country":"country","Suburb":"psuburb","State":"pstate","PostCodeDiv":"psuburbpostcodeDiv"}' />
+			</td>
+		</tr>
+		
+		<tr>
+            <td id="countryLabel" class="">Country:</td>
+            <td colspan="" class="">
+                
+        <select name="country" id="country" onchange='changeCountry ("psuburb", "");'  data-sb-address="country" data-sb-places="country" data-sb-places-priority="1">
+
+            
+                <option selected value=""></option>
+            <option value="4">Afghanistan</option><option value="5">Albania</option><option value="6">Algeria</option><option value="7">Andorra</option><option value="8">Angola</option><option value="9">Antigua and Barbuda</option><option value="10">Argentina</option><option value="11">Armenia</option><option value="3">Australia</option><option value="12">Austria</option><option value="13">Azerbaijan</option><option value="14">Bahamas</option><option value="15">Bahrain</option><option value="16">Bangladesh</option><option value="17">Barbados</option><option value="18">Belarus</option><option value="19">Belgium</option><option value="20">Belize</option><option value="21">Benin</option><option value="201">Bermuda</option><option value="22">Bhutan</option><option value="23">Bolivia</option><option value="24">Bosnia and Herzegovina</option><option value="25">Botswana</option><option value="26">Brazil</option><option value="27">Brunei</option><option value="28">Bulgaria</option><option value="29">Burkina Faso</option><option value="30">Burundi</option><option value="31">Cambodia</option><option value="32">Cameroon</option><option value="2">Canada</option><option value="34">Cape Verde</option><option value="198">Caribbean</option><option value="206">Cayman Islands</option><option value="35">Central African Republic</option><option value="36">Chad</option><option value="37">Chile</option><option value="38">China</option><option value="39">Colombia</option><option value="40">Comoros</option><option value="42">Congo, Democratic Republic of the</option><option value="41">CongoBrazzaville</option><option value="43">Costa Rica</option><option value="44">Côte d'Ivoire</option><option value="45">Croatia</option><option value="46">Cuba</option><option value="47">Cyprus</option><option value="48">Czech Republic</option><option value="49">Denmark</option><option value="50">Djibouti</option><option value="51">Dominica</option><option value="52">Dominican Republic</option><option value="53">East TimorTimor Timur</option><option value="54">Ecuador</option><option value="55">Egypt</option><option value="56">El Salvador</option><option value="204">England</option><option value="57">Equatorial Guinea</option><option value="58">Eritrea</option><option value="59">Estonia</option><option value="60">Ethiopia</option><option value="61">Fiji</option><option value="62">Finland</option><option value="63">France</option><option value="64">Gabon</option><option value="65">Gambia, The</option><option value="66">Georgia</option><option value="67">Germany</option><option value="68">Ghana</option><option value="69">Greece</option><option value="70">Grenada</option><option value="71">Guatemala</option><option value="72">Guinea</option><option value="73">Guinea-Bissau</option><option value="74">Guyana</option><option value="75">Haiti</option><option value="76">Honduras</option><option value="77">Hungary</option><option value="78">Iceland</option><option value="79">India</option><option value="80">Indonesia</option><option value="81">Iran</option><option value="82">Iraq</option><option value="83">Ireland</option><option value="84">Israel</option><option value="85">Italy</option><option value="86">Jamaica</option><option value="87">Japan</option><option value="88">Jordan</option><option value="89">Kazakhstan</option><option value="90">Kenya</option><option value="91">Kiribati</option><option value="92">Korea, North</option><option value="93">Korea, South</option><option value="94">Kuwait</option><option value="95">Kyrgyzstan</option><option value="96">Laos</option><option value="97">Latvia</option><option value="98">Lebanon</option><option value="99">Lesotho</option><option value="100">Liberia</option><option value="101">Libya</option><option value="102">Liechtenstein</option><option value="103">Lithuania</option><option value="104">Luxembourg</option><option value="105">Macedonia, Former Yugoslav Republic of</option><option value="106">Madagascar</option><option value="107">Malawi</option><option value="108">Malaysia</option><option value="109">Maldives</option><option value="110">Mali</option><option value="111">Malta</option><option value="112">Marshall Islands</option><option value="113">Mauritania</option><option value="114">Mauritius</option><option value="115">Mexico</option><option value="116">Micronesia, Federated States of</option><option value="117">Moldova</option><option value="118">Monaco</option><option value="119">Mongolia</option><option value="120">Morocco</option><option value="121">Mozambique</option><option value="122">Myanmar</option><option value="123">Namibia</option><option value="124">Nauru</option><option value="125">Nepal</option><option value="126">Netherlands</option><option value="127">New Zealand</option><option value="128">Nicaragua</option><option value="129">Niger</option><option value="130">Nigeria</option><option value="199">North Africa</option><option value="205">Northern Ireland</option><option value="131">Norway</option><option value="132">Oman</option><option value="133">Pakistan</option><option value="134">Palau</option><option value="135">Panama</option><option value="136">Papua New Guinea</option><option value="137">Paraguay</option><option value="138">Peru</option><option value="139">Philippines</option><option value="140">Poland</option><option value="141">Portugal</option><option value="142">Qatar</option><option value="143">Romania</option><option value="144">Russia</option><option value="145">Rwanda</option><option value="146">Saint Kitts and Nevis</option><option value="147">Saint Lucia</option><option value="148">Saint Vincent and The Grenadines</option><option value="149">Samoa</option><option value="150">San Marino</option><option value="151">Sao Tome and Principe</option><option value="152">Saudi Arabia</option><option value="202">Scotland</option><option value="153">Senegal</option><option value="154">Serbia and Montenegro</option><option value="155">Seychelles</option><option value="156">Sierra Leone</option><option value="157">Singapore</option><option value="158">Slovakia</option><option value="159">Slovenia</option><option value="160">Solomon Islands</option><option value="161">Somalia</option><option value="162">South Africa</option><option value="163">Spain</option><option value="164">Sri Lanka</option><option value="165">Sudan</option><option value="166">Suriname</option><option value="167">Swaziland</option><option value="168">Sweden</option><option value="169">Switzerland</option><option value="170">Syria</option><option value="171">Taiwan</option><option value="172">Tajikistan</option><option value="173">Tanzania</option><option value="174">Thailand</option><option value="175">Togo</option><option value="176">Tonga</option><option value="177">Trinidad and Tobago</option><option value="178">Tunisia</option><option value="179">Turkey</option><option value="180">Turkmenistan</option><option value="181">Tuvalu</option><option value="182">Uganda</option><option value="183">Ukraine</option><option value="184">United Arab Emirates</option><option value="185">United Kingdom</option><option value="1">United States</option><option value="187">Uruguay</option><option value="188">Uzbekistan</option><option value="189">Vanuatu</option><option value="190">Vatican City</option><option value="191">Venezuela</option><option value="192">Vietnam</option><option value="203">Wales</option><option value="194">Western Sahara</option><option value="195">Yemen</option><option value="196">Zambia</option><option value="197">Zimbabwe</option>
+        </select>
+        
+           </td>
+        </tr>
+        <script language="javascript">
+        	$(document).ready(function() {
+            	changeCountry("psuburb", "loadSavedValues(suburbField);;");
+            });
+        </script>
+         
+                        <input type="hidden" name="jurisdiction" id="jurisdiction">
+                        <input type="hidden" name="allAddress" id="allAddress" value="true">
+                        <tr>
+                            <td valign="middle"><img src="/_image/icons/addressHistory16.png" title="Search Address History" />&nbsp;Include Address History</td>
+                            <td valign="middle"><input type="checkbox" checked="true" name="chkIncludeAddressHistory" id="chkIncludeAddressHistory" /></td>
+                        </tr>
+                    </table>
+                </fieldset>        
+            </td>
+        </tr>
+
+            <tr>
+                <td>Phone Number:<br />(searches Home, Work, Mobile, Fax)</td>
+                <td>
+                    <input type="tel" name="phoneNumber" id="phoneNumber" maxlength="10" value="07" />
+                </td>
+            </tr>
+
+            <tr>
+                <td>Email:</td>
+                <td>
+                    <input type="text" name="email" id="email" />
+                </td>
+            </tr>
+
+            <tr>
+                <td>Old Database Record Number:</td><td><input type=text name="oldDatabase" maxlength="40" ID="oldDatabase"></td>
+            </tr>
+            <tr>
+                <td>Company:</td><td><input type=text name=cname onchange="changeCase(this);" ID="Text4"></td>
+            </tr>    
+            <tr><td colspan=2>&nbsp;</td></tr>
+
+            <tr><td colspan=2 align=center><input type=submit name=btnSubmit class="disable-processing" value="Search" ID="Submit5"></td></tr>
+            </table>
+            </form>
+            
+        </td>
+      
+        <td valign="top">
+            <form class="no-confirmation" action="/animal/searchresults.asp?task=search&tpage=1" method=post id="Form4" name=form1>
+                <table width=100% border=0>
+                <tr>
+                    <Td colspan=2 align=center><input type=submit class="disable-processing" name=btnSubmit value="Search" ID="submitAnimalSearch"></td>
+                </tr>
+            
+                <tr>
+                    <td>Partial search:</td>
+                    <td><input type=checkbox  ID="partialSearchAnimal" NAME="partialSearchAnimal"></td>
+                </tr>
+            
+                <tr><td>Shelter Tag / Band Number:</td><td><input type=text name=txttag ID="txttag" maxlength="20">
+                &nbsp;&nbsp;<input type="checkbox" name="searchShelterTagHistory" id="searchShelterTagHistory" onclick="checkSearchHistory()"/>Search History
+                </td></tr>
+                <tr><td>Old Database Number:</td><td><input type="text" name="oldDatabaseNumber" id="oldDatabaseNumber" maxlength="50"></td></tr>
+                <tr>
+                    <td>Microchip Number:</td>
+                    <td><input type="text" name="txtChip" maxlength="15" size="25" ID="txtChip" /></td>
+                </tr>
+                <tr>
+                    <td>SPCA Tag:</td>
+                    <td><input type=text name=txtvip ID="txtvip">&nbsp;&nbsp;<input type="checkbox"  name="searchVIPHistory" id="searchVIPHistory" onclick="checkVIPHistory()">Search History</td>
+                </tr>
+            
+                <tr>
+                    <td>Name:</td>
+                    <td><input type=text name=txtname ID="txtname">&nbsp;&nbsp;<input type="checkbox" name="searchAnimalNameHistory" id="searchAnimalNameHistory" onclick="checkSearchHistory();checkVIPHistory();" />Search History</td>
+                </tr>
+                <tr>
+                    <td>Type:</td>
+                    <td>
+                        
+<select name="txttype"  id="txttype"
+    onchange=""  class="animal-type">
+    <option value="">
+        </option>
+    
+    <option value="76">
+        AMPHIBIANS</option>
+    
+    <option value="80">
+        BABY T-REX</option>
+    
+    <option value="78">
+        BATS</option>
+    
+    <option value="75">
+        BIRD</option>
+    
+    <option value="1">
+        BIRD</option>
+    
+    <option value="2">
+        CAT</option>
+    
+    <option value="3">
+        DOG</option>
+    
+    <option value="79">
+        FLYING FOXES</option>
+    
+    <option value="14">
+        HORSE</option>
+    
+    <option value="15">
+        KITTEN</option>
+    
+    <option value="53">
+        MARSUPIAL</option>
+    
+    <option value="77">
+        NATIVE RATS AND MICE</option>
+    
+    <option value="74">
+        NATIVE REPTILES</option>
+    
+    <option value="16">
+        PUPPY</option>
+    
+    <option value="81">
+        T-REX</option>
+    
+</select>
+       
+                        <input type="checkbox" name="includeJuvenileType" id="includeJuvenileType" />Include Juvenile Type
+                    </td>
+                </tr>
+                
+        <script language="javascript">
+
+        var oldAnimalTypeId = "";
+
+        /*
+        Sets up a species / breed autocomplete given the field name
+        */
+        function SetupAutoCompleteField(textFieldName)
+        {
+            var source = "";
+
+            $("#" + textFieldName).autocomplete({
+                minLength: 3,
+                search: function (event, ui) { PopulateBreedField(textFieldName, event); },
+                source: source,
+                focus: function (event, ui) {
+                    $("#" + textFieldName).val(ui.item.label);
+                    return false;
+                },
+                select: function (event, ui) {
+                    $("#" + textFieldName).val(ui.item.breed);
+                    $("#" + textFieldName + "SpeciesId").val(ui.item.value);
+                    return false;
+                },
+                change: function(event, ui) {
+                    // change event runs to prevent the user typing in text, then leaving field and saving. it will clear the fields if no breed is selected from the autocomplete
+                    //$("#" + textFieldName).val(ui.item ? ui.item.breed : "" );
+                    $("#" + textFieldName + "SpeciesId").val(ui.item ? ui.item.value : "");
+                    return false;
+                }
+            });
+        }
+
+        function InitializeBreedField() {
+
+            
+            // First species field
+            SetupAutoCompleteField("primaryBreed");
+            
+
+        }
+
+        /*
+        Once a user has typed in the breed field, start looking for matching breeds
+        */
+        function PopulateBreedField(breedID, event) {
+
+            $("#" + breedID + "SpeciesId").val("");
+
+            $("#" + breedID + "SearchLink").hide();
+            var animalTypeId = $("#txttype").val();
+
+            if ($("#" + breedID).val().length >= 3 && animalTypeId.length > 0) {
+                var j = new SBJsonRPC();
+                var dt = j.GetBreedAutocomplete(animalTypeId, $("#" + breedID).val());
+
+
+                var breeds = new Array();
+                jQuery.each(dt, function (i, s) {
+                    var i = [
+                        {
+                            value: s.speciesID,
+                            breed: s.breed,
+                            label: s.breed
+                        }
+
+                    ];
+
+                    breeds.push(i[0]);
+                });
+
+
+                $("#" + breedID).autocomplete({
+                    source: breeds
+                });
+
+
+                if (breeds.length < 1) {
+                    $("#" + breedID + "SearchLink").show();
+                }
+            } else {
+                event.preventDefault();
+            }
+        }
+
+         $(document).ready(function () {
+
+                // get the currently selected animal type so we can compare it when the user changes it
+                oldAnimalTypeId = $("#txttype").val();
+
+                InitializeBreedField();
+
+                // Dialog
+                $('#primaryBreedspeciesSearchDlg').dialog({
+                    autoOpen: false,
+                    draggable: true,
+                    width: 500,
+                    height: 500,
+                    bgiframe: true,
+                    modal: true,
+                    buttons: {
+                        "Cancel": function () {
+                            $(this).dialog("close");
+                        }
+
+                    }
+                });
+         });
+
+         // This function is for pages which feature an animal type control which selects the text of the animal type (eg. "Dog")
+         // It populates the field called animalTypeIdFieldName with the id of the animal type
+         function GetAnimalTypeIdFromText()
+        {
+            var animalType = $("#").val();
+            var animalTypeId = "";
+            var animalClass = "";
+
+            // Get the animal type id based on the class id and type text
+            animalClass = $("#").val().toString();
+
+            if (animalType.length > 0 )
+            {
+                jQuery.ajax({
+                    url: "/scripts/animal/speciesControlAjax.asp",
+                    data:{"animalClassID":animalClass, "animalTypeText":animalType},
+                    type: "GET",
+                    async: false, // this makes the ajax-call blocking
+                    dataType: 'text',
+                    success: function (response) {
+
+                        if (response.length > 0)
+                        {
+                            animalTypeId = response;
+                        }
+                    }
+                 });
+             }
+
+             $("#txttype").val(animalTypeId);
+        }
+
+         
+        // Run this when animal type is changed
+         $("#txttype").change(function(){
+
+            // check the type didnt change
+            CheckOldAnimalType();
+
+        });
+        
+
+        function GetSpeciesIdForNewType(fieldName)
+        {
+
+            var newAnimalTypeId = $("#txttype").val();
+
+            if ($("#" + fieldName + "SpeciesId").val().length > 0)
+                {
+                    // animal type is going puppy -> dog, or kitten to cat or vice versa, so just get the species id for this new type
+                    jQuery.ajax({
+                    url: "/scripts/animal/speciesControlAjax.asp",
+                    data:{ task: "checkNewTypeHasBreed", animalTypeId : newAnimalTypeId, speciesId : $("#" + fieldName + "SpeciesId").val() },
+                    type: "GET",
+                    async: false, // this makes the ajax-call blocking
+                    dataType: 'text',
+                    success: function (response) {
+
+                            if (response.length > 0)
+                            {
+                                $("#" + fieldName + "SpeciesId").val(response);
+                            }
+                            else
+                            {
+                                // clear the fields
+                                $("#" + fieldName).val("");
+                                $("#" + fieldName + "SpeciesId").val("");
+                            }
+                        }
+                    });
+                }
+        }
+
+        function CheckOldAnimalType()
+        {
+            var newAnimalTypeId = $("#txttype").val();
+
+            if ((oldAnimalTypeId == "3" && newAnimalTypeId == "16") || (oldAnimalTypeId == "16" && newAnimalTypeId == "3") || (oldAnimalTypeId == "15" && newAnimalTypeId == "2") || (oldAnimalTypeId == "2" && newAnimalTypeId == "15"))
+            {
+
+                
+                GetSpeciesIdForNewType("primaryBreed");
+                
+            }
+            else
+            {
+                ClearFields();
+            }
+        }
+
+        function ClearFields()
+        {
+
+            
+            // Clear the primary breed details
+            $("#primaryBreed").val("");
+            $("#primaryBreedSpeciesId").val("");
+            
+
+        }
+
+        function SearchForSpeciesId(breedField)
+        {
+            var animalTypeId = $("#txttype").val();
+            var breed = $("#" + breedField).val();
+
+            jQuery.ajax({
+                url: "/scripts/animal/speciesControlSearch.asp",
+                data:{"animalTypeId":animalTypeId, "breed": breed, "breedFieldId": breedField},
+                type: "GET",
+                async: false, // this makes the ajax-call blocking
+                dataType: 'text',
+                success: function (response) {
+
+                    if (response.length > 0)
+                    {
+                        document.getElementById("primaryBreedspeciesSearchDlgContent").innerHTML = response;
+                        $("#primaryBreedspeciesSearchDlg").dialog('open');
+                    }
+                }
+             });
+
+
+        }
+
+        function SelectSpeciesFromSearch(speciesId, breedText, breedField)
+        {
+            $("#" + breedField).val(breedText);
+            $("#" + breedField + "SpeciesId").val(speciesId);
+            $("#primaryBreedspeciesSearchDlg").dialog('close');
+            $("#" + breedField + "SearchLink").hide();
+        }
+
+        function checkForNoBreed(id)
+        {
+            // if the user totally clears a breed field, we need to remove the hidden species id
+            if ($("#" + id).val().length == 0)
+            {
+                $("#" + id + "SpeciesId").val("");
+            }
+        }
+        </script>
+    
+                <tr>
+                    <td><label for="primaryBreed" id="primaryBreedLabel">Breed/Species</label></td>
+                    <td>
+
+        <div id="primaryBreedspeciesSearchDlg" title="Select Breed / Species">
+        <div class="bd" id="primaryBreedspeciesSearchDlgContent">
+        </div>
+        </div>
+        <div class="ui-widget">
+            <input id="primaryBreed" name="primaryBreed" size="30"  value="" onchange="checkForNoBreed(this.id);" />
+            <a style="display:none;font-size:small;" href="" id="primaryBreedSearchLink" href="" onclick="SearchForSpeciesId('primaryBreed');return false;">No Matches Found.  Click here to search.</a>
+            <input type="hidden" id="primaryBreedSpeciesId" name="primaryBreedSpeciesId"  value=""/>
+        </div>
+        </td>
+                </tr>
+                <tr>
+                    <td>Status:</td>
+                    <td>
+        <select id="status" name="status"  class="status-field" onchange="">
+            
+                        <option  value=""></option>
+                    
+                        <option  value="13">Adopted</option>
+                    
+                        <option  value="146">Adopted - Awaiting Pickup</option>
+                    
+                        <option  value="108">Adopted - Awaiting Spay / Neuter</option>
+                    
+                        <option  value="50">Adopted Altered</option>
+                    
+                        <option  value="115">Adopted Offsite</option>
+                    
+                        <option  value="52">Adopted Offsite(Altered)</option>
+                    
+                        <option  value="51">Adopted Offsite(Unaltered)</option>
+                    
+                        <option  value="152">Adopted to Finder</option>
+                    
+                        <option  value="56">Adopted Unaltered</option>
+                    
+                        <option  value="37">Adoption Pending / Hold On Property Check</option>
+                    
+                        <option  value="3">Available For Adoption</option>
+                    
+                        <option  value="124">Available for Adoption - Awaiting Spay/Neuter</option>
+                    
+                        <option  value="92">Available for Adoption - In Foster</option>
+                    
+                        <option  value="149">Available For Adoption - No Web Presence</option>
+                    
+                        <option  value="118">Available for Adoption - Offsite</option>
+                    
+                        <option  value="129">Available for Adoption - Waiting Space</option>
+                    
+                        <option  value="85">Awaiting Behavior Completion</option>
+                    
+                        <option  value="84">Awaiting Behavior Retest</option>
+                    
+                        <option  value="55">Awaiting Behavioral Assessment</option>
+                    
+                        <option  value="42">Awaiting Euthanasia</option>
+                    
+                        <option  value="79">Awaiting Final Disposition</option>
+                    
+                        <option  value="8">Awaiting Foster</option>
+                    
+                        <option  value="73">Awaiting Rescue</option>
+                    
+                        <option  value="9">Awaiting Sort</option>
+                    
+                        <option  value="114">Awaiting Spay Check</option>
+                    
+                        <option  value="6">Awaiting Spay/Neuter</option>
+                    
+                        <option  value="130">Awaiting Spay/Neuter - In Foster</option>
+                    
+                        <option  value="111">Awaiting Surgery - Not Spay/Neuter</option>
+                    
+                        <option  value="91">Awaiting Transfer</option>
+                    
+                        <option  value="113">Awaiting Triage</option>
+                    
+                        <option  value="122">Awaiting Triage Completion</option>
+                    
+                        <option  value="142">Awaiting Vet Approval - In Foster</option>
+                    
+                        <option  value="112">Awaiting Vet Exam / Health Check</option>
+                    
+                        <option  value="104">Bequest Animal Off Site</option>
+                    
+                        <option  value="103">Bequest Animal On Site</option>
+                    
+                        <option  value="44">Bite Quarantine</option>
+                    
+                        <option  value="158">Bite Quarantine - In Foster</option>
+                    
+                        <option  value="101">Bite Quarantine (Home)</option>
+                    
+                        <option  value="148">Bite Quarantine/RTO</option>
+                    
+                        <option  value="89">Boarding Client</option>
+                    
+                        <option  value="54">Court Hold</option>
+                    
+                        <option  value="43">Cremated</option>
+                    
+                        <option  value="60">Cremation - Communal</option>
+                    
+                        <option  value="59">Cremation - Private</option>
+                    
+                        <option  value="110">Deceased</option>
+                    
+                        <option  value="162">Delayed Adoption</option>
+                    
+                        <option  value="163">Delayed Council Out</option>
+                    
+                        <option  value="117">Disposition Under Final Review</option>
+                    
+                        <option  value="61">DOA</option>
+                    
+                        <option  value="75">DOA - Final Disposition</option>
+                    
+                        <option  value="145">DOA - Released to Owner</option>
+                    
+                        <option  value="123">DOA Transfer</option>
+                    
+                        <option  value="30">Due For Release</option>
+                    
+                        <option  value="49">Emergency Boarding</option>
+                    
+                        <option  value="137">Emergency Boarding Returned To Owner</option>
+                    
+                        <option  value="143">Emergency Evacuation - In Foster</option>
+                    
+                        <option  value="77">Emergency Evacuation - Permanent</option>
+                    
+                        <option  value="76">Emergency Evacuation - Released</option>
+                    
+                        <option  value="78">Emergency Evacuation - Temporary</option>
+                    
+                        <option  value="159">Entered Care</option>
+                    
+                        <option  value="67">EOA - Euthanized on Arrival</option>
+                    
+                        <option  value="27">Escaped</option>
+                    
+                        <option  value="48">Euthanasia - RTO</option>
+                    
+                        <option  value="88">Euthanasia In Field</option>
+                    
+                        <option  value="2">Euthanised</option>
+                    
+                        <option  value="144">Euthanised During Stray Hold Time</option>
+                    
+                        <option  value="86">Euthanized by Offsite Vet</option>
+                    
+                        <option  value="12">Found</option>
+                    
+                        <option  value="20">Hold</option>
+                    
+                        <option  value="63">Hold Agency Transfer</option>
+                    
+                        <option  value="53">Hold Euthanasia</option>
+                    
+                        <option  value="25">Hold Finder</option>
+                    
+                        <option  value="31">Hold For Possible Match</option>
+                    
+                        <option  value="35">Hold In Foster</option>
+                    
+                        <option  value="38">Hold In Vet Care</option>
+                    
+                        <option  value="33">Hold Intervention</option>
+                    
+                        <option  value="40">Hold Quarantine</option>
+                    
+                        <option  value="119">Hospitalised</option>
+                    
+                        <option  value="147">ID Trace</option>
+                    
+                        <option  value="4">In Foster</option>
+                    
+                        <option  value="45">Information</option>
+                    
+                        <option  value="154">Internal Transfer In</option>
+                    
+                        <option  value="153">Internal Transfer Out</option>
+                    
+                        <option  value="46">Interred</option>
+                    
+                        <option  value="47">Lost</option>
+                    
+                        <option  value="19">Matched</option>
+                    
+                        <option  value="128">Necropsy</option>
+                    
+                        <option  value="65">Owner Relinquishment</option>
+                    
+                        <option  value="116">PAT</option>
+                    
+                        <option  value="10">Pet D Tect</option>
+                    
+                        <option  value="139">Platinum Pet D Tect</option>
+                    
+                        <option  value="39">Police Hold</option>
+                    
+                        <option  value="155">Possible Match</option>
+                    
+                        <option  value="126">Post-operative Death</option>
+                    
+                        <option  value="125">Privately Rehomed - New Owner Unknown</option>
+                    
+                        <option  value="140">Protective Custody - Awaiting Foster</option>
+                    
+                        <option  value="107">Protective Custody Hold Quarantine</option>
+                    
+                        <option  value="36">Protective Custody In Foster</option>
+                    
+                        <option  value="28">Protective Custody/Hold</option>
+                    
+                        <option  value="29">Protective Custody/Transferred Ownership</option>
+                    
+                        <option  value="16">Reclaimed</option>
+                    
+                        <option  value="134">Reclaimed - Awaiting Spay / Neuter</option>
+                    
+                        <option  value="100">Redemption (Offsite)</option>
+                    
+                        <option  value="68">Rehabilitating</option>
+                    
+                        <option  value="15">Released</option>
+                    
+                        <option  value="156">Released by Agency</option>
+                    
+                        <option  value="62">Released To Agency</option>
+                    
+                        <option  value="87">Released to Owner at Vet</option>
+                    
+                        <option  value="64">Released To Rescue</option>
+                    
+                        <option  value="80">Released to Wildlife Rehabilitator</option>
+                    
+                        <option  value="105">Released/Forfeited to Shelter</option>
+                    
+                        <option  value="157">Return to Habitat</option>
+                    
+                        <option  value="93">Returned Home</option>
+                    
+                        <option  value="32">Returned Protective Custody Animal</option>
+                    
+                        <option  value="71">Returned Surrender</option>
+                    
+                        <option  value="24">Returned To Owner</option>
+                    
+                        <option  value="131">Sanctuary/Life Resident</option>
+                    
+                        <option  value="102">Seized Release</option>
+                    
+                        <option  value="120">Species Management</option>
+                    
+                        <option  value="81">Stolen</option>
+                    
+                        <option  value="127">Stray - In Foster</option>
+                    
+                        <option  value="72">Stray Hold</option>
+                    
+                        <option  value="151">Stray Hold - Awaiting transfer</option>
+                    
+                        <option  value="150">Stray Hold - In Vet Care</option>
+                    
+                        <option  value="22">Transfer Out</option>
+                    
+                        <option  value="161">Transfer Out - Awaiting Pickup</option>
+                    
+                        <option  value="74">Trial Adoption</option>
+                    
+                        <option  value="23">Unassisted Death</option>
+                    
+                        <option  value="133">Unassisted Death - In Foster</option>
+                    
+                        <option  value="160">Unassisted Death - In Transit</option>
+                    
+                        <option  value="121">Under Behavior Modification</option>
+                    
+                        <option  value="7">Under Vet Care</option>
+                    
+                        <option  value="90">Unresolved File</option>
+                    
+                        <option  value="57">Wildlife Released</option>
+                    
+        </select>
+        </td>
+                </tr>
+                <tr>
+                    <td>Sub-Status:</td>
+                    <td>
+        <select name="subStatus" id="subStatus"class="substatus-field">
+            
+                <option value=""></option>
+            
+        </select>
+    </td>
+                </tr>
+                <tr>
+                    <td>Date Found:</td>
+                    <td>
+                        
+		<input type=text  maxlength=10 size="10" name="txtdatein" id="txtdatein" value="" style="pointer-events: none;" onkeydown="return false;" >
+		&nbsp;&nbsp;
+		<A id="txtdateinCalendarLink" href="/scripts/calendar.asp?field=txtdatein&dateJScript=False&onchange=&doesAllowFutureDates=True" OnClick="NewWindow(this.href,'calendar',205,230,'no','center'); return false;">
+		<IMG align=top border=0 height=25 id="txtdateinCalendar" src="/images/calendar.gif" width=26></A>
+        <input type="hidden" value="" id="txtdatein-utc" name="txtdatein-utc" />
+		    
+                        &nbsp;&nbsp;Exact Date<input type="checkbox" name="exactDateIn" id="exactDateIn" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>Date Lost:</td>
+                    <td>
+                        
+		<input type=text  maxlength=10 size="10" name="txtdateout" id="txtdateout" value="" style="pointer-events: none;" onkeydown="return false;" >
+		&nbsp;&nbsp;
+		<A id="txtdateoutCalendarLink" href="/scripts/calendar.asp?field=txtdateout&dateJScript=False&onchange=&doesAllowFutureDates=True" OnClick="NewWindow(this.href,'calendar',205,230,'no','center'); return false;">
+		<IMG align=top border=0 height=25 id="txtdateoutCalendar" src="/images/calendar.gif" width=26></A>
+        <input type="hidden" value="" id="txtdateout-utc" name="txtdateout-utc" />
+		
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>Recent Incoming Date:</td>
+                    <td>
+                        
+		<input type=text  maxlength=10 size="10" name="incomingDate" id="incomingDate" value="" style="pointer-events: none;" onkeydown="return false;" >
+		&nbsp;&nbsp;
+		<A id="incomingDateCalendarLink" href="/scripts/calendar.asp?field=incomingDate&dateJScript=False&onchange=&doesAllowFutureDates=True" OnClick="NewWindow(this.href,'calendar',205,230,'no','center'); return false;">
+		<IMG align=top border=0 height=25 id="incomingDateCalendar" src="/images/calendar.gif" width=26></A>
+        <input type="hidden" value="" id="incomingDate-utc" name="incomingDate-utc" />
+		    
+                        &nbsp;&nbsp;Exact Date<input type="checkbox" name="exactIncomingDate" id="exactIncomingDate" />
+                    </td>
+                </tr>
+                <tr>
+                    <td>Last Outgoing Date:</td>
+                    <td>
+                        
+		<input type=text  maxlength=10 size="10" name="txtOutgoingDate" id="txtOutgoingDate" value="" style="pointer-events: none;" onkeydown="return false;" >
+		&nbsp;&nbsp;
+		<A id="txtOutgoingDateCalendarLink" href="/scripts/calendar.asp?field=txtOutgoingDate&dateJScript=False&onchange=&doesAllowFutureDates=True" OnClick="NewWindow(this.href,'calendar',205,230,'no','center'); return false;">
+		<IMG align=top border=0 height=25 id="txtOutgoingDateCalendar" src="/images/calendar.gif" width=26></A>
+        <input type="hidden" value="" id="txtOutgoingDate-utc" name="txtOutgoingDate-utc" />
+		
+                        &nbsp;&nbsp;Exact Date<input type="checkbox" name="exactOutgoingDate" id="exactOutgoingDate" />
+                    </td>
+                </tr>
+
+                <tr><td>Physical Location:</td>
+                    <td>
+                    
+        <select name="physicalLocation" id="physicalLocation" class="" onchange="listShelters(this.value, 'refugelocation', 'shelter', '');" >
+        
+                <option value="0" >All</option>
+                <option value="90">Apostrophe's Region</option><option value="59">Bingo the Adoption Centre</option><option value="53">Boston</option><option value="54">Dallas</option><option value="10696">Hollister</option><option value="64">Ingleside Shelter</option><option value="51">Los Angeles</option><option value="63">Mountain Region</option><option value="92">New Medication Region</option><option value="91">Parksville-Qualicum Beach & District Branch</option><option value="65">Pet Match Adoption Centre</option><option value="62">Petitude</option><option value="60">Ralph</option><option value="61">San Diego</option><option value="57">Satellite Pet Centre</option><option value="58">The Humane Pet Shop</option><option value="56">Weird and Wacky World of Pets</option><option value="55">YouBeaut Pets Offsite Adoptions</option>
+        </select>
+        
+                    </td>
+                </tr>
+
+                <tr>
+                	<td>Shelter Location:</td>
+                    <td><select name="refugelocation" id="refugelocation"></select></td>
+                </tr>
+
+                <tr><td colspan=2>&nbsp;</td></tr>
+                <tr>
+                    <td colspan=2 align=center><input type=submit class="disable-processing" name="btnSubmit" value="Search" id="Submit7" /></td>
+                </tr>
+                </table>
+            </form>
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2" style="border-bottom:1px solid #ff9933;">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top">
+            
+                <form class="no-confirmation" action="/animal/poundsearch.asp?task=search&tpage=1" method=post name=poundSearchForm ID="Form5">
+                    <table width="100%">
+                        <tr>
+                            <td colspan=2 align=center><h2 id="poundSearch">Council Search</h2></td>
+                        </tr>
+                        <tr>
+                            <td>Council:</td>
+                            <td>
+                                
+        <select name="pound" id="pound" >
+        
+        <option value=""></option>
+        
+                    <option value="41321">*Brisbane City Council</option>
+                    
+                    <option value="153361">Animal Emergency Clinic</option>
+                    
+                    <option value="157741">Big Council Shelter</option>
+                    
+                    <option value="147228">Bling</option>
+                    
+                    <option value="146100">Bonobo Shire Council</option>
+                    
+                    <option value="27027">Brown Regional Council</option>
+                    
+                    <option value="30529">Cairns City Council</option>
+                    
+                    <option value="26134">Carlton</option>
+                    
+                    <option value="147195">Cassowary Coast Regional Council</option>
+                    
+                    <option value="230765">City Of Hollister</option>
+                    
+                    <option value="63975">Control</option>
+                    
+                    <option value="25870">Cooloola Shire Council</option>
+                    
+                    <option value="25964">Henry</option>
+                    
+                    <option value="41322">Hooby Dooby Council</option>
+                    
+                    <option value="141507">Ipswich City Council</option>
+                    
+                    <option value="47771">KENT COUNTY ANIMAL SHELTER</option>
+                    
+                    <option value="25865">Kingaroy, Regional Council</option>
+                    
+                    <option value="25935">Lemmy</option>
+                    
+                    <option value="61940">New Agency Record</option>
+                    
+                    <option value="25924">Nicci'S Council</option>
+                    
+                    <option value="25866">Noosa Shire Council</option>
+                    
+                    <option value="62552">Okepoke Regional Council</option>
+                    
+                    <option value="25867">Pine Rivers Shire Council</option>
+                    
+                    <option value="26005">RSPCA</option>
+                    
+                    <option value="230767">San Benito County</option>
+                    
+                    <option value="156948">Tellington Shire Council</option>
+                    
+                    <option value="329131">Test</option>
+                    
+                    <option value="196805">Test Agency Sb-10258</option>
+                    
+                    <option value="349709">Test For Address</option>
+                    
+                    <option value="25868">Thuringowa City Council</option>
+                    
+                    <option value="30528">Toowoomba Regional Council</option>
+                    
+        </select>
+
+    
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Animal Type:</td>
+                            <td>
+<select name="type"  id="type"
+    onchange=""  class="">
+    <option value="">
+        </option>
+    
+    <option value="Amphibians">
+        AMPHIBIANS</option>
+    
+    <option value="Baby T-Rex">
+        BABY T-REX</option>
+    
+    <option value="Bats">
+        BATS</option>
+    
+    <option value="Bird">
+        BIRD</option>
+    
+    <option value="Bird">
+        BIRD</option>
+    
+    <option value="Cat">
+        CAT</option>
+    
+    <option value="Dog">
+        DOG</option>
+    
+    <option value="Flying Foxes">
+        FLYING FOXES</option>
+    
+    <option value="Horse">
+        HORSE</option>
+    
+    <option value="Kitten">
+        KITTEN</option>
+    
+    <option value="Marsupial">
+        MARSUPIAL</option>
+    
+    <option value="Native Rats And Mice">
+        NATIVE RATS AND MICE</option>
+    
+    <option value="Native Reptiles">
+        NATIVE REPTILES</option>
+    
+    <option value="Puppy">
+        PUPPY</option>
+    
+    <option value="T-Rex">
+        T-REX</option>
+    
+</select>
+</td>
+                        </tr>    
+                        <tr>
+                            <td>Date In Shelter:</td>
+                            <td>
+		<input type=text  maxlength=10 size="10" name="dateInRefuge" id="dateInRefuge" value="11/04/2025" style="pointer-events: none;" onkeydown="return false;" >
+		&nbsp;&nbsp;
+		<A id="dateInRefugeCalendarLink" href="/scripts/calendar.asp?field=dateInRefuge&dateJScript=False&onchange=&doesAllowFutureDates=True" OnClick="NewWindow(this.href,'calendar',205,230,'no','center'); return false;">
+		<IMG align=top border=0 height=25 id="dateInRefugeCalendar" src="/images/calendar.gif" width=26></A>
+        <input type="hidden" value="2025-04-11T09:11:00Z" id="dateInRefuge-utc" name="dateInRefuge-utc" />
+		</td>
+                        </tr>                    
+                        <tr><td colspan=2>&nbsp;</td></tr>
+                        <tr>
+                            <td colspan=2 align=center><input type=submit class="disable-processing" name=poundSubmit value="Search" ID="Submit8"></td>
+                        </tr>
+                    </table>
+                </form>
+            
+        </td>
+
+        <td valign="top">
+            <form class="no-confirmation" action="/animal/transferResults.asp?task=search&tpage=1" method=post id=form8 name=form8>
+                <table width="100%">
+                    <tr>
+                        <td colspan=2 align=center><h2 id="animalTransfer">Animal Transfer Search</h2></td>
+                    </tr>
+                    <tr>
+                        <td>Transferred From</td>
+                        <td>
+                        
+        <select name="transferFrom" id="transferFrom" class="" onchange="" >
+        
+                <option value="" selected></option>
+                <option value="90">Apostrophe's Region</option><option value="59">Bingo the Adoption Centre</option><option value="53">Boston</option><option value="54">Dallas</option><option value="10696">Hollister</option><option value="64">Ingleside Shelter</option><option value="51">Los Angeles</option><option value="63">Mountain Region</option><option value="92">New Medication Region</option><option value="91">Parksville-Qualicum Beach & District Branch</option><option value="65">Pet Match Adoption Centre</option><option value="62">Petitude</option><option value="60">Ralph</option><option value="61">San Diego</option><option value="57">Satellite Pet Centre</option><option value="58">The Humane Pet Shop</option><option value="56">Weird and Wacky World of Pets</option><option value="55">YouBeaut Pets Offsite Adoptions</option>
+        </select>
+        
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Transferred To</td>
+                        <td>
+                        
+        <select name="transferTo" id="transferTo" class="" onchange="" >
+        
+                <option value="" selected></option>
+                <option value="90">Apostrophe's Region</option><option value="59">Bingo the Adoption Centre</option><option value="53">Boston</option><option value="54">Dallas</option><option value="10696">Hollister</option><option value="64">Ingleside Shelter</option><option value="51">Los Angeles</option><option value="63">Mountain Region</option><option value="92">New Medication Region</option><option value="91">Parksville-Qualicum Beach & District Branch</option><option value="65">Pet Match Adoption Centre</option><option value="62">Petitude</option><option value="60">Ralph</option><option value="61">San Diego</option><option value="57">Satellite Pet Centre</option><option value="58">The Humane Pet Shop</option><option value="56">Weird and Wacky World of Pets</option><option value="55">YouBeaut Pets Offsite Adoptions</option>
+        </select>
+                    
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Transferred Date:</td>
+                        <td>
+		<input type=text  maxlength=10 size="10" name="transferdate" id="transferdate" value="" style="pointer-events: none;" onkeydown="return false;" >
+		&nbsp;&nbsp;
+		<A id="transferdateCalendarLink" href="/scripts/calendar.asp?field=transferdate&dateJScript=False&onchange=&doesAllowFutureDates=True" OnClick="NewWindow(this.href,'calendar',205,230,'no','center'); return false;">
+		<IMG align=top border=0 height=25 id="transferdateCalendar" src="/images/calendar.gif" width=26></A>
+        <input type="hidden" value="" id="transferdate-utc" name="transferdate-utc" />
+		</td>
+                    </tr>
+                    <tr><Td colspan=2>&nbsp;</td></tr>
+                    <tr>
+                        <Td colspan=2 align=center><input type=submit class="disable-processing" name=amboSubmit value="Search" ID="Submit9"></td>
+                    </tr>
+                </table>
+            </form>
+        </td>    
+    </tr>
+    <tr>
+        <td colspan="2" style="border-bottom:1px solid #ff9933;">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top">
+            <form class="no-confirmation" action="/search/microchipSR.asp?tpage=1&task=search" method=post id=licenseNumSearch name=licenseNumSearch>
+                <table width="100%" border=0>
+                    <tr>
+                        <td colspan=2 align=center><h2 id="mircochip">Microchip Search</h2></td>
+                    </tr>
+                    
+                    <tr>
+                        <td>Partial search:</td>
+                        <td><input type=checkbox ID="partial-search-microchip" NAME="partial-search-microchip"></td>
+                    </tr>
+                    <tr>
+                        <td>Microchip #:</td>
+                        <td><input type="text" name="microchip" maxlength="20" size="15" ID="Text8"></td>
+                    </tr>        
+                    <tr><td colspan=2>&nbsp;</td></tr>
+                    <tr>
+                        <td colspan=2 align=center><input type=submit class="disable-processing" name=microchipSubmit value="Search" ID="Submit10"></td>
+                    </tr>
+                </table>
+            </form>
+        </td>
+    
+        <td valign="top">
+                
+            <form class="no-confirmation" action="/person/obedienceSearch.asp?task=search&tpage=1" method=post id=form7 name=form7>
+                <table width="100%">
+                    <tr>
+                        <td colspan=2 align=center><h2 id="obedience">Obedience Handler Search</h2></td>
+                    </tr>
+                        <tr>
+                            <td>Name:</td>
+                            <td><input type=text name=handlerName ID="Text9"></td>
+                        </tr>
+                        <tr><td colspan=2>&nbsp;</td></tr>
+                        <tr>
+                            <td colspan=2 align=center><input type=submit class="disable-processing" name=handlerSubmit value="Search" ID="Submit11"></td>
+                        </tr>
+                </table>    
+            </form>
+            
+        </td>
+    </tr>
+    <tr>
+        <td colspan="2" style="border-bottom:1px solid #ff9933;">&nbsp;</td>
+    </tr>
+    <tr>
+        <td valign="top">
+            <form class="no-confirmation" action="/search/licenseSR.asp?tpage=1&task=search&type=1" method=post id="Form6" name=licenseNumSearch>
+                <table width="100%" border=0>
+                    <tr>
+                        <Td colspan=2 align=center><h2 id="vip">Registration Search</h2></td>
+                    </tr>
+
+                    <tr>
+                        <td>Partial search:</td>
+                        <td><input type=checkbox ID="partialSearchLicense" NAME="partialSearchLicense"></td>
+                    </tr>
+
+                    <tr>
+                        <Td>Registration #:</td>
+                        <td><input type="text" name="licenseNum" maxlength="50" size="8" ID="licenseNum">
+                        &nbsp;&nbsp;<input type="checkbox" name="searchLicenseNumberHistory" id="searchLicenseNumberHistory"/>Search History
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Search For:</td>
+                        <td>
+                            <select name=searchType id=searchType>
+                            <option value="All">Animal and Owner Details</option>
+                            <option value="Animal">Animal Details</option>
+                            <option value="Owner">Owner Details</option>
+                            </select>
+                        </td>
+                    </tr>    
+                    <tr><td>Include Registrations entered<br>only on animal details:</td><td><input type=checkbox name=animalDetails></td></tr>
+                    <tr><Td colspan=2>&nbsp;</td></tr>
+                    <tr>
+                        <Td colspan=2 align=center><input type=submit class="disable-processing" name=licenseNumSubmit value="Search" ID="Submit12"></td>
+                    </tr>
+                </table>
+            </form>
+        </td>
+        
+    </tr>
+    
+    
+        <tr>
+            <td colspan="2" style="border-bottom:1px solid #ff9933;">&nbsp;</td>
+        </tr>
+        <tr>
+            <td valign="top">
+                <form class="no-confirmation" action="/person/amboSearch.asp" method="post">
+                    <table width="100%">
+                        <tr>
+                            <td colspan=2 align=center><h2 id="ambo">Ambulance Search</h2></td>
+                        </tr>
+                        <tr>
+                            <td>Ambulance Number: &nbsp;&nbsp;<b>A</b></td>
+                            <td><input type="text" name="amboNum" onblur="validate(this)"></td>
+                        </tr>
+                        <tr><td colspan=2>&nbsp;</td></tr>
+                        <tr>
+                            <Td colspan=2 align=center><input type=submit class="disable-processing" name=amboSubmit id="amboSubmit" value="Search" /></td>
+                        </tr>
+                    </table>
+                </form>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2" style="border-bottom:1px solid #ff9933;">&nbsp;</td>
+        </tr>
+        <tr>
+            <td valign="top">
+                <form class="no-confirmation" action="/person/amboPickupSearch.asp?task=search&tpage=1" method=post id=amboPickup name=amboPickup>
+                    <table width="100%">
+                        <tr>
+                            <td colspan=2 align=center><h2 id="amboPickUp">Ambulance Pick up Location Search</h2></td>
+                        </tr>
+                        <tr>
+                            <td>Address Line:</td>
+                            <td><input type="text" name="amboline1" id="amboline1" maxlength="500" size="30" /></td>
+                        </tr>
+                        
+		<script language="">
+		    var amboPickupSuburbPostcodeField = "amboPickupPostcode";
+		    var amboPickupSuburbStateField = "amboState";
+		    var amboPickupSuburbCountryField = "amboCountry";
+		    var amboPickupSuburbJurisdictionField = "";
+		    var amboPickupSuburbJurisdictionHiddenField = "jurisdiction";
+		    var amboPickupSuburbClassType = "";
+		    var amboPickupSuburbStateColumn = "";
+		    var amboPickupSuburbDivPopup = "locationDlg";
+		    var amboPickupSuburbDivId = "locationBd";
+		    var amboPickupSuburbUseJurisdictionId = true;
+
+		    var amboPickupSuburbSavedSuburb = "";
+		    var amboPickupSuburbSavedSuburbId = "";
+		    var amboPickupSuburbSavedPostcode = "";
+		    var amboPickupSuburbSavedPostcodeSuffix = "";
+		    var amboPickupSuburbSavedState = "";
+		    var amboPickupPostcodeCheck = true;
+
+            var amboPickupSuburbChangeCountryScript = "";
+            var amboPickupSuburbAllFieldOnChange = "";
+            var amboPickupSuburbSavedCountry = "";
+            var amboPickupSuburbbAdminInput = false;
+		</Script>
+		<tr>
+			<td class="" id="amboPickupSuburbLabel">Suburb:</td>
+			<td class="" colspan="">
+                <input type="hidden" id="amboPickupSuburb-places-postalcode" data-sb-places="postal_code" data-sb-places-priority="2" value="" />
+                <input type="text" id="amboPickupSuburb" value="" name="amboPickupSuburb" size="20" maxlength="50" onchange="getElement('amboPickupSuburbId').value = '';loadSuburb('amboPickupSuburb', this.value, getPostalCode('amboPickupSuburb'), '');"  data-sb-address="suburb" data-sb-places="locality" data-sb-places-aux="sublocality" data-sb-places-wait="true" data-sb-places-priority="3" />&nbsp;
+			<input type="button" value="Find Suburb" onClick="if(getElement('amboPickupSuburb').value.length==0){ alert('Please enter a Suburb in the Suburb field');}else{loadSuburb('amboPickupSuburb', getElement('amboPickupSuburb').value, getPostalCode('amboPickupSuburb'), '');}" name="amboPickupSuburbButton2" ID="amboPickupSuburbButton2" data-sb-places="find-suburb">
+			<input type="hidden" name="amboPickupSuburbId" id="amboPickupSuburbId" value="">
+			</td>
+		</tr>
+		<tr>
+			<td id="amboPickupPostcodeLabel" class="">Post Code:</td>
+			<td colspan="" class="">
+                <div style="margin:0px;padding:0px;" id="amboPickupSuburbpostcodeDiv"></div>
+			</td>
+		</tr>
+		<tr>
+			<td id="amboStateLabel" class="">State:</td>
+			<td colspan="" class="">
+                <input type="text" data-autocomplete="state" name="amboState" id="amboState" value="" data-onchange="" />
+                
+                <input type="hidden" ID="fieldIds" data-fields='{"Country":"amboCountry","Suburb":"amboPickupSuburb","State":"amboState","PostCodeDiv":"amboPickupSuburbpostcodeDiv"}' />
+			</td>
+		</tr>
+		
+		<tr>
+            <td id="amboCountryLabel" class="">Country:</td>
+            <td colspan="" class="">
+                
+        <select name="amboCountry" id="amboCountry" onchange='changeCountry ("amboPickupSuburb", "");'  data-sb-address="country" data-sb-places="country" data-sb-places-priority="1">
+
+            
+                <option selected value=""></option>
+            <option value="4">Afghanistan</option><option value="5">Albania</option><option value="6">Algeria</option><option value="7">Andorra</option><option value="8">Angola</option><option value="9">Antigua and Barbuda</option><option value="10">Argentina</option><option value="11">Armenia</option><option value="3">Australia</option><option value="12">Austria</option><option value="13">Azerbaijan</option><option value="14">Bahamas</option><option value="15">Bahrain</option><option value="16">Bangladesh</option><option value="17">Barbados</option><option value="18">Belarus</option><option value="19">Belgium</option><option value="20">Belize</option><option value="21">Benin</option><option value="201">Bermuda</option><option value="22">Bhutan</option><option value="23">Bolivia</option><option value="24">Bosnia and Herzegovina</option><option value="25">Botswana</option><option value="26">Brazil</option><option value="27">Brunei</option><option value="28">Bulgaria</option><option value="29">Burkina Faso</option><option value="30">Burundi</option><option value="31">Cambodia</option><option value="32">Cameroon</option><option value="2">Canada</option><option value="34">Cape Verde</option><option value="198">Caribbean</option><option value="206">Cayman Islands</option><option value="35">Central African Republic</option><option value="36">Chad</option><option value="37">Chile</option><option value="38">China</option><option value="39">Colombia</option><option value="40">Comoros</option><option value="42">Congo, Democratic Republic of the</option><option value="41">CongoBrazzaville</option><option value="43">Costa Rica</option><option value="44">Côte d'Ivoire</option><option value="45">Croatia</option><option value="46">Cuba</option><option value="47">Cyprus</option><option value="48">Czech Republic</option><option value="49">Denmark</option><option value="50">Djibouti</option><option value="51">Dominica</option><option value="52">Dominican Republic</option><option value="53">East TimorTimor Timur</option><option value="54">Ecuador</option><option value="55">Egypt</option><option value="56">El Salvador</option><option value="204">England</option><option value="57">Equatorial Guinea</option><option value="58">Eritrea</option><option value="59">Estonia</option><option value="60">Ethiopia</option><option value="61">Fiji</option><option value="62">Finland</option><option value="63">France</option><option value="64">Gabon</option><option value="65">Gambia, The</option><option value="66">Georgia</option><option value="67">Germany</option><option value="68">Ghana</option><option value="69">Greece</option><option value="70">Grenada</option><option value="71">Guatemala</option><option value="72">Guinea</option><option value="73">Guinea-Bissau</option><option value="74">Guyana</option><option value="75">Haiti</option><option value="76">Honduras</option><option value="77">Hungary</option><option value="78">Iceland</option><option value="79">India</option><option value="80">Indonesia</option><option value="81">Iran</option><option value="82">Iraq</option><option value="83">Ireland</option><option value="84">Israel</option><option value="85">Italy</option><option value="86">Jamaica</option><option value="87">Japan</option><option value="88">Jordan</option><option value="89">Kazakhstan</option><option value="90">Kenya</option><option value="91">Kiribati</option><option value="92">Korea, North</option><option value="93">Korea, South</option><option value="94">Kuwait</option><option value="95">Kyrgyzstan</option><option value="96">Laos</option><option value="97">Latvia</option><option value="98">Lebanon</option><option value="99">Lesotho</option><option value="100">Liberia</option><option value="101">Libya</option><option value="102">Liechtenstein</option><option value="103">Lithuania</option><option value="104">Luxembourg</option><option value="105">Macedonia, Former Yugoslav Republic of</option><option value="106">Madagascar</option><option value="107">Malawi</option><option value="108">Malaysia</option><option value="109">Maldives</option><option value="110">Mali</option><option value="111">Malta</option><option value="112">Marshall Islands</option><option value="113">Mauritania</option><option value="114">Mauritius</option><option value="115">Mexico</option><option value="116">Micronesia, Federated States of</option><option value="117">Moldova</option><option value="118">Monaco</option><option value="119">Mongolia</option><option value="120">Morocco</option><option value="121">Mozambique</option><option value="122">Myanmar</option><option value="123">Namibia</option><option value="124">Nauru</option><option value="125">Nepal</option><option value="126">Netherlands</option><option value="127">New Zealand</option><option value="128">Nicaragua</option><option value="129">Niger</option><option value="130">Nigeria</option><option value="199">North Africa</option><option value="205">Northern Ireland</option><option value="131">Norway</option><option value="132">Oman</option><option value="133">Pakistan</option><option value="134">Palau</option><option value="135">Panama</option><option value="136">Papua New Guinea</option><option value="137">Paraguay</option><option value="138">Peru</option><option value="139">Philippines</option><option value="140">Poland</option><option value="141">Portugal</option><option value="142">Qatar</option><option value="143">Romania</option><option value="144">Russia</option><option value="145">Rwanda</option><option value="146">Saint Kitts and Nevis</option><option value="147">Saint Lucia</option><option value="148">Saint Vincent and The Grenadines</option><option value="149">Samoa</option><option value="150">San Marino</option><option value="151">Sao Tome and Principe</option><option value="152">Saudi Arabia</option><option value="202">Scotland</option><option value="153">Senegal</option><option value="154">Serbia and Montenegro</option><option value="155">Seychelles</option><option value="156">Sierra Leone</option><option value="157">Singapore</option><option value="158">Slovakia</option><option value="159">Slovenia</option><option value="160">Solomon Islands</option><option value="161">Somalia</option><option value="162">South Africa</option><option value="163">Spain</option><option value="164">Sri Lanka</option><option value="165">Sudan</option><option value="166">Suriname</option><option value="167">Swaziland</option><option value="168">Sweden</option><option value="169">Switzerland</option><option value="170">Syria</option><option value="171">Taiwan</option><option value="172">Tajikistan</option><option value="173">Tanzania</option><option value="174">Thailand</option><option value="175">Togo</option><option value="176">Tonga</option><option value="177">Trinidad and Tobago</option><option value="178">Tunisia</option><option value="179">Turkey</option><option value="180">Turkmenistan</option><option value="181">Tuvalu</option><option value="182">Uganda</option><option value="183">Ukraine</option><option value="184">United Arab Emirates</option><option value="185">United Kingdom</option><option value="1">United States</option><option value="187">Uruguay</option><option value="188">Uzbekistan</option><option value="189">Vanuatu</option><option value="190">Vatican City</option><option value="191">Venezuela</option><option value="192">Vietnam</option><option value="203">Wales</option><option value="194">Western Sahara</option><option value="195">Yemen</option><option value="196">Zambia</option><option value="197">Zimbabwe</option>
+        </select>
+        
+           </td>
+        </tr>
+        <script language="javascript">
+        	$(document).ready(function() {
+            	changeCountry("amboPickupSuburb", "loadSavedValues(suburbField);;");
+            });
+        </script>
+         
+                        
+                        <tr><td colspan=2>&nbsp;</td></tr>
+                        <tr>
+                            <td colspan=2 align=center><input type=submit class="disable-processing" name="offenderSearchSubmit" value="Search" ID="offenderSearchSubmit"></td>
+                        </tr>
+                    </table>
+                </form>
+            </td>
+        </tr>
+        <!-- Receipt Search -->
+        <tr>
+            <td colspan="2" style="border-bottom:1px solid #ff9933;">&nbsp;</td>
+        </tr>
+        <tr>
+            <td valign="top">
+                <table width="100%" ID="Table15">
+                    <tr>
+                        <Td colspan=4 align=center><h2 id="receipt">Receipt Search</h2></td>
+                    </tr>
+                        <tr>
+                                <td colspan=2>Go to Receipt Number:</td>
+                                <td colspan=2>
+                                    <form class="no-confirmation" action="/receipts/receiptSearchResults.asp?task=search" method=post id="Form11" name=form3>
+                                        <input type=hidden name="from" value="/main.asp" ID="Hidden2">
+                                        <input type=hidden name="ID" value="yes" ID="Hidden1">
+                                        <input type=text name=receiptID id="receiptID" maxlength=10 size=8 onblur="validate(this)">&nbsp;&nbsp;<input type=submit class="disable-processing" name=btnSubmit value="View" ID="Submit16">
+                                    </form>
+                                </td>
+                        </tr>
+                    <tr><td>&nbsp;</td></tr>
+                    <tr>
+                        <td colspan="4">
+                            <form class="no-confirmation" action="/receipts/receiptSearchResults.asp?task=search" method=post id="Form14" name=form3>
+                                <table>
+                                    <tr>
+                                        <td>Person ID:</td>
+                                        <td>
+                                            <input type=hidden name="from" value="/main.asp" ID="Hidden3">
+                                            <input type="text" name="personid" id="Text13" maxlength="10" size="10" onblur="validate(this)">
+                                        </td>
+                
+                                        <td>Animal ID:</td>
+                                        <td>
+                                            <input type="text" name="animalID" maxlength="10" size="10"  onblur="validate(this)" ID="Text14">
+                                        </td>
+                
+                                    </tr>
+                                    <tr>
+                                        <td>&nbsp;</td>
+                                    </tr>
+                                     <tr>        
+                                        <td>Voucher No:</td>
+                                        <td><input type=text name=voucherno id="voucherno" maxlength=6 size=5 onblur="validate(this)"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>&nbsp;</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan=4 align=center>
+                                            <input type=submit class="disable-processing" name=btnSubmit value="Search" ID="Submit17">
+                                        </td>
+                                    </tr>
+                               </table>
+                            </form>
+                        </td>                    
+                </table>
+            </td>
+            <td>&nbsp;</td>
+        </tr>
+    
+        
+    
+    
+</table>
+
+		<div id="locationDlg"  title="Suburb / Post Code">
+
+		<div class="bd" id="locationBd" style="overflow:auto;">
+		</div>
+		</div>
+		
+
+<table style="width:450px;" border="0" cellpadding="0" cellspacing="0" valign="center">
+	<tr>
+		<td class="BottomFooter">
+			For all creatures great and small
+		</td>
+	</tr>
+	
+	</table>
+    <table align="right"><tr><td>Version 1744260065335</td></tr></table>
+</td>
+</tr>
+</table>
+
+
+<!--pagetimer="0.729"-->
+	<div id="techinfo" style="display:none;position:inline; width: 100%; text-align:right; margin-top:-65px; margin-right:2px; color: #b36b24">
+	<br>
+	0.729s
+	</div>
+</BODY>
+</HTML>
+
